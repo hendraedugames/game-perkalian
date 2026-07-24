@@ -1,0 +1,19 @@
+Taruh file suara Anda di folder ini dengan nama PERSIS seperti berikut.
+Boleh format .m4a ATAU .mp3 (dua-duanya didukung, sistem otomatis
+mendeteksi mana yang tersedia - coba .m4a dulu, kalau tidak ada baru
+coba .mp3):
+
+  benar.m4a / benar.mp3                 -> suara jawaban benar ("tring")
+  salah.m4a / salah.mp3                 -> suara jawaban salah ("tetot")
+  waktu_habis.m4a / waktu_habis.mp3     -> suara waktu habis ("teeet")
+  hore.m4a / hore.mp3                   -> suara nilai 90-99 ("horeee" ramai)
+  itsok.m4a / itsok.mp3                 -> suara nilai 80-89 ("it's ok")
+  firework.m4a / firework.mp3           -> suara nilai 100 (ledakan kembang api)
+  intro.m4a / intro.mp3                 -> musik intro pembuka di splash screen
+
+Kalau tidak ada file dengan nama itu sama sekali (baik .m4a maupun
+.mp3), game otomatis akan memakai suara sintesis bawaan sebagai
+pengganti - tidak akan error/kosong.
+
+Setelah menambahkan file suara, hapus file "BACA_INI.txt" ini
+(opsional, tidak wajib, hanya untuk kerapian folder).

@@ -1,0 +1,1194 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+<title>Super Game Perkalian</title>
+<meta name="theme-color" content="#1a1a2e">
+<link rel="manifest" href="manifest.json">
+<!-- Font di-hosting LOKAL (bukan CDN) supaya pasti tampil walau offline - berlaku sama
+     baik dibuka sebagai PWA maupun dibungkus jadi APK lewat Capacitor -->
+<style>
+@font-face{
+  font-family:'Geostar';
+  src: url('fonts/Geostar.ttf') format('truetype');
+  font-weight: normal;
+  font-display: swap;
+}
+@font-face{
+  font-family:'Orbitron';
+  src: url('fonts/Orbitron.ttf') format('truetype');
+  font-weight: 400 900;
+  font-display: swap;
+}
+</style>
+<link rel="apple-touch-icon" href="icons/icon-192.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Perkalian">
+<style>
+:root{
+  --bg:#1a1a2e; --panel:#16213e; --aksen1:#e94560; --aksen2:#0f3460;
+  --kuning:#f5a623; --hijau:#4CAF50; --putih:#ffffff; --abu:#aaaaaa; --teks:#e0e0e0;
+}
+*{box-sizing:border-box; -webkit-tap-highlight-color:transparent; user-select:none;}
+html,body{margin:0; padding:0; height:100%; overflow:hidden; background:var(--bg); font-family:'Segoe UI',Arial,sans-serif;}
+#app{position:fixed; inset:0; background:var(--bg); overflow:hidden;}
+.frame{position:absolute; inset:0; display:flex; flex-direction:column; align-items:center; overflow-y:auto; -webkit-overflow-scrolling:touch; padding-bottom:70px;}
+
+/* util */
+.btn{border:none; border-radius:10px; cursor:pointer; font-weight:bold; color:var(--putih); font-family:inherit; transition:transform .08s;}
+.btn:active{transform:scale(0.96);}
+.back-btn{position:fixed; left:16px; bottom:14px; background:var(--panel); color:var(--abu); border:none; border-radius:8px; padding:10px 16px; font-weight:bold; font-size:13px; cursor:pointer; z-index:50;}
+
+/* MENU UTAMA */
+.menu-wrap{justify-content:center; padding-top:6vh;}
+.banner-sub{color:var(--kuning); font-size:16px; font-weight:bold; letter-spacing:3px;}
+.banner-title{color:var(--aksen1); font-size:clamp(30px,7vw,56px); font-weight:900; margin:4px 0; text-align:center;}
+.banner-tag{color:var(--teks); font-style:italic; font-size:14px; margin-bottom:24px;}
+.kotak-row{display:flex; gap:24px; flex-wrap:wrap; justify-content:center; margin-top:10px;}
+.kotak{width:220px; height:140px; border-radius:16px; display:flex; flex-direction:column; align-items:center; justify-content:center; cursor:pointer; box-shadow:0 6px 18px rgba(0,0,0,.35);}
+.kotak .emoji{font-size:40px;}
+.kotak .lbl{font-weight:bold; font-size:16px; text-align:center; margin-top:6px; white-space:pre-line;}
+.credit{position:fixed; right:12px; bottom:10px; color:var(--abu); font-size:10px;}
+
+/* HEADINGS */
+h2.judul{color:var(--kuning); font-size:clamp(20px,4vw,28px); margin:22px 0 6px; text-align:center;}
+.aksen-judul{color:var(--aksen1) !important;}
+.subteks{color:var(--teks); font-size:13px; margin-bottom:10px; text-align:center; padding:0 16px;}
+
+/* GRID TABEL */
+.grid-tabel{display:grid; grid-template-columns:repeat(5,1fr); gap:10px; padding:10px 16px; max-width:640px; width:100%;}
+@media(max-width:480px){.grid-tabel{grid-template-columns:repeat(2,1fr);}}
+.grid-tabel .btn{padding:14px 6px; font-size:15px;}
+
+/* ISI TABEL N */
+.baris-tabel{width:90%; max-width:420px; background:var(--panel); border-radius:12px; padding:14px 24px; margin-top:12px;}
+.baris-tabel div{padding:6px 0; font-size:18px; font-weight:bold; text-align:left;}
+
+/* MENU TES */
+.timer-row{display:flex; align-items:center; gap:8px; margin:10px 0;}
+.timer-row input{width:56px; text-align:center; font-size:15px; font-weight:bold; padding:6px; border-radius:6px; border:none; background:var(--panel); color:var(--kuning);}
+.label-sub{color:var(--abu); font-weight:bold; font-size:12px; margin:14px 0 8px; letter-spacing:1px;}
+.grid-pilih-tabel{display:grid; grid-template-columns:repeat(2,1fr); gap:8px; width:90%; max-width:420px;}
+.col-campur{display:flex; flex-direction:column; gap:8px; width:90%; max-width:340px; margin-top:4px;}
+.col-campur .btn{padding:12px; font-size:14px;}
+
+/* PILIHAN CAMPUR */
+.grid-pilih5{display:grid; grid-template-columns:repeat(5,1fr); gap:8px; width:95%; max-width:640px;}
+@media(max-width:480px){.grid-pilih5{grid-template-columns:repeat(2,1fr);}}
+.grid-pilih5 .btn{padding:12px 4px; font-size:13px;}
+.jumlah-row{display:flex; gap:10px; margin-top:6px;}
+.jumlah-row .btn{width:60px; padding:10px 0;}
+.peringatan{color:var(--aksen1); font-weight:bold; font-size:13px; height:18px; margin-top:8px;}
+.mulai-btn{background:var(--hijau); padding:14px 40px; font-size:17px; margin-top:14px;}
+
+/* SOAL */
+.soal-frame{justify-content:center; align-items:center; padding-top:3vh; text-align:center;}
+.soal-header{color:var(--teks); font-weight:bold; font-size:14px; margin-bottom:4px; text-align:center;}
+.timer-lbl{font-weight:bold; font-size:22px; color:var(--teks); margin-bottom:10px; text-align:center;}
+.soal-center-col{display:flex; flex-direction:column; align-items:center; width:100%;}
+.soal-row{display:flex; align-items:center; justify-content:center; gap:10px; font-size:clamp(38px,9vw,64px); font-weight:900; color:var(--putih);}
+.soal-row input{width:2.3em; text-align:center; background:var(--panel); color:var(--kuning); border:none; border-radius:10px; font-size:inherit; font-weight:inherit; padding:2px 6px;}
+.info-fb{font-size:17px; font-weight:bold; height:22px; margin-top:8px; text-align:center;}
+.feedback-circle{width:64px; height:64px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:34px; color:white;}
+.fb-benar{background:#00aa00;}
+.fb-salah{background:#cc0000;}
+#fbCircleWrap{height:70px; display:flex; align-items:center; justify-content:center; margin-top:8px;}
+
+/* NUMPAD + TOMBOL JAWAB: default (iPad/tablet/desktop) proporsi tombol dikecilkan ~2:3 terhadap teks soal, di-center vertikal oleh .soal-frame */
+.numpad-footer{display:flex; flex-direction:column; align-items:center; margin-top:18px;}
+.numpad{display:grid; grid-template-columns:repeat(3,94px); gap:7px; justify-content:center;}
+.numpad button{padding:9px 0; font-size:20px; border-radius:9px; border:none; background:var(--panel); color:var(--putih); font-weight:bold; box-shadow:0 3px 8px rgba(0,0,0,.3); width:100%;}
+.numpad button:active{transform:scale(0.94); background:#22345c;}
+.numpad button.num-del{background:var(--aksen1);}
+.numpad button.num-clear{background:#555;}
+.jawab-btn{background:var(--hijau); font-size:14px; margin-top:9px; padding:14px 0; width:calc(94px*3 + 7px*2);}
+.jawab-btn:disabled{opacity:.5;}
+
+/* HP POTRET (rasio ramping seperti iPhone/Android, bukan iPad): numpad dikunci di bawah dekat jempol,
+   tombol dipendekkan supaya baris atas (1,2,3) tetap terjangkau, teks diperbesar mengisi ruang */
+@media (orientation:portrait) and (max-aspect-ratio: 3/5){
+  .soal-frame{justify-content:flex-start; padding-top:4vh; padding-bottom:245px;}
+  .soal-header{font-size:15px;}
+  .timer-lbl{font-size:24px; margin-bottom:10px;}
+  .soal-row{font-size:clamp(46px,13vw,74px);}
+  .info-fb{font-size:18px; height:24px;}
+  .feedback-circle{width:78px; height:78px; font-size:40px;}
+  #fbCircleWrap{height:88px;}
+  .numpad-footer{position:fixed; left:0; right:0; bottom:52px; margin-top:0; padding:10px 0 18px; background:linear-gradient(to top, rgba(0,0,0,.45), rgba(0,0,0,0) 100%); z-index:30;}
+  .numpad{grid-template-columns:repeat(3,80px); gap:8px;}
+  .numpad button{padding:7px 0; font-size:23px; border-radius:10px;}
+  .jawab-btn{width:calc(80px*3 + 8px*2); padding:13px 0; font-size:15px; margin-top:8px;}
+  .back-btn-soal{z-index:40;}
+}
+
+/* LANDSCAPE ADAPTATION */
+@media (orientation:landscape) and (max-height:520px){
+  .soal-frame{padding-top:2vh; padding-bottom:10px;}
+  .soal-header{margin-bottom:3px; font-size:13px;}
+  .timer-lbl{margin-bottom:6px; font-size:16px;}
+  .soal-row{font-size:clamp(26px,6vw,38px); gap:6px;}
+  .info-fb{margin-top:5px; height:16px; font-size:12px;}
+  .feedback-circle{width:50px; height:50px; font-size:26px;}
+  #fbCircleWrap{height:58px; margin-top:5px;}
+  .numpad-footer{margin-top:6px;}
+  .numpad{grid-template-columns:repeat(3,44px); gap:5px;}
+  .numpad button{padding:6px 0; font-size:15px; border-radius:8px;}
+  .jawab-btn{margin-top:6px; padding:10px 0; font-size:12px; width:calc(44px*3 + 5px*2);}
+  .back-btn{padding:7px 12px; font-size:11px;}
+}
+@media (orientation:landscape) and (max-height:420px){
+  .soal-row{font-size:clamp(20px,5vw,28px);}
+  .numpad{grid-template-columns:repeat(3,38px); gap:4px;}
+  .numpad button{padding:5px 0; font-size:12px;}
+  .jawab-btn{width:calc(38px*3 + 4px*2); font-size:11px; padding:8px 0;}
+}
+
+/* HASIL */
+.hasil-top{display:flex; flex-wrap:wrap; justify-content:center; gap:30px; align-items:flex-start; margin-top:10px; width:100%;}
+.nilai-besar{font-size:clamp(70px,16vw,110px); font-weight:900;}
+.rekap{display:flex; flex-direction:column; gap:4px; padding-top:20px;}
+.rekap div{font-size:14px; font-weight:bold;}
+.riwayat-box{width:92%; max-width:600px; max-height:160px; overflow-y:auto; background:var(--panel); border-radius:10px; margin-top:8px; padding:6px 12px;}
+.riwayat-box div{font-size:12px; padding:2px 0;}
+.hasil-btn-row{display:flex; gap:14px; margin-top:20px; flex-wrap:wrap; justify-content:center;}
+.hasil-btn-row .btn{padding:12px 20px; font-size:14px; width:150px;}
+
+/* ══════════════════ SPLASH SCREEN PEMBUKA ══════════════════ */
+#splashScreen{
+  position:fixed; inset:0; z-index:999; cursor:pointer;
+  display:flex; flex-direction:column; align-items:center; justify-content:center;
+  background:radial-gradient(circle at 50% 38%, #1f2a52 0%, #0c0f24 55%, #05060f 100%);
+  transition:opacity .6s ease; text-align:center; padding:0 24px;
+  overflow:hidden;
+}
+#splashScreen::before, #splashScreen::after{
+  content:''; position:absolute; border-radius:50%; opacity:.15;
+  background:radial-gradient(circle, #4dd0ff 0%, transparent 70%);
+}
+#splashScreen::before{ width:340px; height:340px; top:-80px; left:-80px; }
+#splashScreen::after{ width:280px; height:280px; bottom:-70px; right:-60px; }
+.splash-hide{ opacity:0; }
+.splash-title{
+  font-family:'Geostar','Orbitron',sans-serif;
+  font-size:clamp(26px,7.5vw,50px);
+  color:#4dd0ff;
+  text-shadow:0 0 10px rgba(77,208,255,.85), 0 0 26px rgba(77,208,255,.5), 0 0 46px rgba(77,208,255,.3);
+  letter-spacing:3px;
+  line-height:1.35;
+  z-index:2;
+}
+.splash-sub{
+  font-family:'Orbitron',sans-serif;
+  color:var(--kuning);
+  font-weight:700;
+  font-size:clamp(12px,3vw,16px);
+  letter-spacing:2px;
+  margin-top:14px;
+  z-index:2;
+}
+.splash-tap{
+  color:#8a93b8; font-size:12px; margin-top:52px; letter-spacing:1px;
+  animation:splashBlink 1.5s ease-in-out infinite; z-index:2;
+}
+@keyframes splashBlink{ 0%,100%{opacity:.35;} 50%{opacity:1;} }
+</style>
+</head>
+<body>
+<div id="splashScreen">
+  <div class="splash-title">HENDRA<br>EDUGAMES</div>
+  <div class="splash-sub">POWERED BY BIMBEL MELEK HURUF</div>
+  <div class="splash-tap">&#9655; Ketuk di mana saja untuk mulai</div>
+</div>
+<div id="app"></div>
+
+<script>
+/* ══════════════════ WARNA & DATA ══════════════════ */
+const WARNA_SOAL  = ["#16213e","#0f3460","#1a1a2e","#162447","#1f4068","#1b262c"];
+
+/* ══════════════════ SISTEM SUARA (Web Audio API, tanpa file eksternal, cocok offline) ══════════════════ */
+let audioCtx = null;
+function getAudioCtx(){
+  if(!audioCtx){
+    audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+  }
+  if(audioCtx.state === 'suspended') audioCtx.resume();
+  return audioCtx;
+}
+// aktifkan audio context saat sentuhan/klik pertama (wajib untuk Safari iOS)
+function primeAudio(){
+  getAudioCtx();
+}
+
+/* ══════════════════ PEMUTAR FILE MP3 (opsional) DENGAN FALLBACK OTOMATIS ══════════════════ */
+// Taruh file MP3 Mahar sendiri di folder sounds/ dengan nama-nama berikut, PWA akan otomatis
+// memakainya. Kalau file belum ada / gagal dimuat, otomatis balik ke suara sintesis bawaan
+// (tidak akan rusak/kosong walau sebagian file belum diisi).
+//   sounds/benar.mp3         -> pengganti suara "tring" jawaban benar
+//   sounds/salah.mp3         -> pengganti suara "tetot" jawaban salah
+//   sounds/waktu_habis.mp3   -> pengganti suara "teeet" waktu habis
+//   sounds/hore.mp3          -> pengganti suara "horeee" nilai 90-99
+//   sounds/itsok.mp3         -> pengganti suara "it's ok" nilai 80-89
+//   sounds/firework.mp3      -> pengganti suara ledakan kembang api nilai 100
+//   sounds/intro.mp3         -> pengganti musik intro pembuka di splash screen
+function mainkanFile(daftarPath, volume, fallbackFn, idx){
+  // daftarPath bisa berupa satu string path, ATAU array beberapa path yang akan dicoba
+  // berurutan (misal .m4a dulu, kalau tidak ada baru coba .mp3). Kalau semuanya gagal,
+  // baru jalankan fallbackFn (suara sintesis bawaan).
+  const daftar = Array.isArray(daftarPath) ? daftarPath : [daftarPath];
+  idx = idx || 0;
+  if(idx >= daftar.length){
+    if(fallbackFn) fallbackFn();
+    return;
+  }
+  try{
+    const audio = new Audio(daftar[idx]);
+    audio.volume = (volume !== undefined) ? volume : 1;
+    let sudahLanjut = false;
+    const cobaBerikutnya = ()=>{
+      if(!sudahLanjut){ sudahLanjut = true; mainkanFile(daftar, volume, fallbackFn, idx + 1); }
+    };
+    audio.addEventListener('error', cobaBerikutnya);
+    const playPromise = audio.play();
+    if(playPromise !== undefined){
+      playPromise.catch(cobaBerikutnya);
+    }
+  } catch(e){
+    mainkanFile(daftar, volume, fallbackFn, idx + 1);
+  }
+}
+// Splash screen "HENDRA EDUGAMES": sentuhan pertama di sini yang membuka izin audio browser
+// SEKALIGUS memicu musik intro pembuka - persis di titik paling awal sebelum menu utama muncul.
+function mulaiDariSplash(e){
+  const splash = document.getElementById('splashScreen');
+  if(!splash) return;
+  // Cegah event ini menjalar/memicu klik susulan ke tombol menu di baliknya
+  if(e){ e.preventDefault(); e.stopPropagation(); }
+  // Buka izin audio browser di sini (wajib terjadi langsung saat sentuhan/gesture pengguna)
+  getAudioCtx();
+  splash.classList.add('splash-hide');
+  setTimeout(()=>{
+    splash.remove();
+    // Musik intro baru dimainkan SETELAH benar-benar sampai di layar Menu Utama (bukan saat masih di splash)
+    suaraIntroPembuka();
+  }, 650);
+}
+document.addEventListener('DOMContentLoaded', ()=>{
+  const splash = document.getElementById('splashScreen');
+  if(splash){
+    splash.addEventListener('touchstart', mulaiDariSplash, {once:true, passive:false});
+    splash.addEventListener('click', mulaiDariSplash, {once:true});
+  }
+});
+
+function nada(freq, waktuMulai, durasi, tipe, volume){
+  const ctx = getAudioCtx();
+  const osc = ctx.createOscillator();
+  const gain = ctx.createGain();
+  osc.type = tipe || 'sine';
+  osc.frequency.setValueAtTime(freq, ctx.currentTime + waktuMulai);
+  gain.gain.setValueAtTime(0, ctx.currentTime + waktuMulai);
+  gain.gain.linearRampToValueAtTime(volume||0.25, ctx.currentTime + waktuMulai + 0.01);
+  gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + waktuMulai + durasi);
+  osc.connect(gain).connect(ctx.destination);
+  osc.start(ctx.currentTime + waktuMulai);
+  osc.stop(ctx.currentTime + waktuMulai + durasi + 0.02);
+}
+function suaraBenar(){
+  mainkanFile(['sounds/benar.m4a','sounds/benar.mp3'], 0.9, suaraBenarSintesis);
+}
+function suaraBenarSintesis(){
+  // "Tring" - dua nada naik cepat, ceria. Nada sine secara alami terdengar lebih pelan
+  // di telinga dibanding gelombang square/sawtooth pada suara "Salah" (volume dasar 0.32),
+  // jadi volume utama tring dibuat 1.5x dari itu = 0.48.
+  nada(1046.5, 0,    0.13, 'sine', 0.48);  // C6
+  nada(1568.0, 0.08, 0.22, 'sine', 0.45);  // G6
+  nada(2093.0, 0.14, 0.18, 'sine', 0.26);  // C7 - kilau tambahan di akhir
+}
+function suaraSalah(){
+  mainkanFile(['sounds/salah.m4a','sounds/salah.mp3'], 0.9, suaraSalahSintesis);
+}
+function suaraSalahSintesis(){
+  // "Tetot" - buzzer agresif & kencang, dua nada rendah ganda dengan gelombang lebih tebal
+  const ctx = getAudioCtx();
+  function buzz(freq, mulai, durasi, vol){
+    const osc = ctx.createOscillator();
+    const osc2 = ctx.createOscillator();
+    const gain = ctx.createGain();
+    osc.type = 'sawtooth';
+    osc2.type = 'square';
+    osc.frequency.setValueAtTime(freq, ctx.currentTime + mulai);
+    osc2.frequency.setValueAtTime(freq*0.99, ctx.currentTime + mulai);
+    gain.gain.setValueAtTime(0, ctx.currentTime + mulai);
+    gain.gain.linearRampToValueAtTime(vol, ctx.currentTime + mulai + 0.015);
+    gain.gain.setValueAtTime(vol, ctx.currentTime + mulai + durasi*0.7);
+    gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + mulai + durasi);
+    osc.connect(gain); osc2.connect(gain); gain.connect(ctx.destination);
+    osc.start(ctx.currentTime + mulai); osc2.start(ctx.currentTime + mulai);
+    osc.stop(ctx.currentTime + mulai + durasi + 0.02);
+    osc2.stop(ctx.currentTime + mulai + durasi + 0.02);
+  }
+  buzz(200, 0,    0.20, 0.32);
+  buzz(150, 0.19, 0.28, 0.32);
+}
+function suaraWaktuHabis(){
+  mainkanFile(['sounds/waktu_habis.m4a','sounds/waktu_habis.mp3'], 0.9, suaraWaktuHabisSintesis);
+}
+function suaraWaktuHabisSintesis(){
+  // "Teeet" - satu nada panjang datar, khas alarm waktu habis, volume seimbang dengan suaraSalah
+  const ctx = getAudioCtx();
+  const osc = ctx.createOscillator();
+  const gain = ctx.createGain();
+  osc.type = 'square';
+  osc.frequency.setValueAtTime(440, ctx.currentTime);
+  gain.gain.setValueAtTime(0, ctx.currentTime);
+  gain.gain.linearRampToValueAtTime(0.32, ctx.currentTime + 0.02);
+  gain.gain.setValueAtTime(0.32, ctx.currentTime + 0.55);
+  gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.7);
+  osc.connect(gain).connect(ctx.destination);
+  osc.start();
+  osc.stop(ctx.currentTime + 0.72);
+}
+function suaraIntro(){
+  // fanfare pendek saat sesi tes dimulai
+  nada(523.25, 0,    0.14, 'triangle', 0.22); // C5
+  nada(659.25, 0.10, 0.14, 'triangle', 0.22); // E5
+  nada(783.99, 0.20, 0.14, 'triangle', 0.22); // G5
+  nada(1046.5, 0.30, 0.28, 'triangle', 0.26); // C6
+}
+/* ─── Helper synth untuk intro modern: pad chord (filter sweep), riser, impact, pluck arpeggio ─── */
+function padChord(freqs, mulai, durasi, filterAwal, filterAkhir, volume){
+  const ctx = getAudioCtx();
+  freqs.forEach((f)=>{
+    const osc1 = ctx.createOscillator();
+    const osc2 = ctx.createOscillator();
+    const filter = ctx.createBiquadFilter();
+    const gain = ctx.createGain();
+    osc1.type = 'sawtooth';
+    osc2.type = 'sawtooth';
+    osc1.frequency.setValueAtTime(f, ctx.currentTime + mulai);
+    osc2.frequency.setValueAtTime(f * 1.006, ctx.currentTime + mulai); // detune tipis -> efek chorus/lebar
+    filter.type = 'lowpass';
+    filter.Q.value = 1.1;
+    filter.frequency.setValueAtTime(filterAwal, ctx.currentTime + mulai);
+    filter.frequency.linearRampToValueAtTime(filterAkhir, ctx.currentTime + mulai + durasi);
+    gain.gain.setValueAtTime(0, ctx.currentTime + mulai);
+    gain.gain.linearRampToValueAtTime(volume, ctx.currentTime + mulai + 0.18);
+    gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + mulai + durasi);
+    osc1.connect(filter); osc2.connect(filter); filter.connect(gain).connect(ctx.destination);
+    osc1.start(ctx.currentTime + mulai); osc2.start(ctx.currentTime + mulai);
+    osc1.stop(ctx.currentTime + mulai + durasi + 0.05);
+    osc2.stop(ctx.currentTime + mulai + durasi + 0.05);
+  });
+}
+function pluck(freq, mulai, durasi, volume){
+  const ctx = getAudioCtx();
+  const osc = ctx.createOscillator();
+  const filter = ctx.createBiquadFilter();
+  const gain = ctx.createGain();
+  osc.type = 'sawtooth';
+  osc.frequency.setValueAtTime(freq, ctx.currentTime + mulai);
+  filter.type = 'lowpass';
+  filter.Q.value = 3;
+  filter.frequency.setValueAtTime(5000, ctx.currentTime + mulai);
+  filter.frequency.exponentialRampToValueAtTime(500, ctx.currentTime + mulai + durasi);
+  gain.gain.setValueAtTime(0, ctx.currentTime + mulai);
+  gain.gain.linearRampToValueAtTime(volume, ctx.currentTime + mulai + 0.008);
+  gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + mulai + durasi);
+  osc.connect(filter).connect(gain).connect(ctx.destination);
+  osc.start(ctx.currentTime + mulai);
+  osc.stop(ctx.currentTime + mulai + durasi + 0.02);
+}
+function riser(mulai, durasi){
+  const ctx = getAudioCtx();
+  // noise riser lewat bandpass yang frekuensinya naik terus -> efek "membangun tensi"
+  const bufferSize = Math.floor(ctx.sampleRate * durasi);
+  const buffer = ctx.createBuffer(1, bufferSize, ctx.sampleRate);
+  const data = buffer.getChannelData(0);
+  for(let i=0;i<bufferSize;i++){ data[i] = Math.random()*2-1; }
+  const src = ctx.createBufferSource();
+  src.buffer = buffer;
+  const filter = ctx.createBiquadFilter();
+  filter.type = 'bandpass';
+  filter.Q.value = 0.7;
+  filter.frequency.setValueAtTime(300, ctx.currentTime + mulai);
+  filter.frequency.exponentialRampToValueAtTime(6000, ctx.currentTime + mulai + durasi);
+  const gain = ctx.createGain();
+  gain.gain.setValueAtTime(0.001, ctx.currentTime + mulai);
+  gain.gain.exponentialRampToValueAtTime(0.22, ctx.currentTime + mulai + durasi);
+  src.connect(filter).connect(gain).connect(ctx.destination);
+  src.start(ctx.currentTime + mulai);
+  src.stop(ctx.currentTime + mulai + durasi + 0.02);
+  // sine sweep naik menyertai, menambah rasa "terangkat"
+  const osc = ctx.createOscillator();
+  const oGain = ctx.createGain();
+  osc.type = 'sine';
+  osc.frequency.setValueAtTime(200, ctx.currentTime + mulai);
+  osc.frequency.exponentialRampToValueAtTime(1400, ctx.currentTime + mulai + durasi);
+  oGain.gain.setValueAtTime(0.001, ctx.currentTime + mulai);
+  oGain.gain.exponentialRampToValueAtTime(0.15, ctx.currentTime + mulai + durasi);
+  osc.connect(oGain).connect(ctx.destination);
+  osc.start(ctx.currentTime + mulai);
+  osc.stop(ctx.currentTime + mulai + durasi + 0.02);
+}
+function impactDrop(mulai){
+  const ctx = getAudioCtx();
+  // sub-bass "boom" dengan pitch env turun cepat
+  const osc = ctx.createOscillator();
+  const gain = ctx.createGain();
+  osc.type = 'sine';
+  osc.frequency.setValueAtTime(150, ctx.currentTime + mulai);
+  osc.frequency.exponentialRampToValueAtTime(45, ctx.currentTime + mulai + 0.35);
+  gain.gain.setValueAtTime(0.55, ctx.currentTime + mulai);
+  gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + mulai + 0.5);
+  osc.connect(gain).connect(ctx.destination);
+  osc.start(ctx.currentTime + mulai);
+  osc.stop(ctx.currentTime + mulai + 0.55);
+  // crack noise pendek menyertai dentuman
+  bisingPutih(0.16, 0.28, mulai, 1800);
+  // chord stab tebal menyertai impact
+  padChord([261.63,329.63,392.00,587.33], mulai, 0.9, 3600, 1100, 0.11); // Cmaj(add9)-ish stab
+}
+
+function suaraIntroPembuka(){
+  mainkanFile(['sounds/intro.m4a','sounds/intro.mp3'], 0.85, suaraIntroPembukaSintesis);
+}
+function suaraIntroPembukaSintesis(){
+  // Musik intro pembuka bergaya "game trailer modern": riser tensi -> bass drop/impact ->
+  // chord pad melayang dengan filter sweep -> arpeggio pluck cepat -> hook melodi penutup + shimmer.
+  // Total durasi ~5.3 detik, dimainkan sekali saat pertama kali splash disentuh.
+
+  // FASE 1 (0 - 1.3s): riser membangun tensi
+  riser(0, 1.3);
+
+  // FASE 2 (1.3s): bass drop + chord stab (klimaks pertama)
+  impactDrop(1.3);
+
+  // FASE 3 (1.55 - 3.6s): chord pad mengambang + arpeggio pluck energik di atasnya
+  padChord([261.63,329.63,392.00,493.88], 1.55, 2.15, 3000, 900, 0.09); // Cmaj7 pad
+  const arp = [523.25,659.25,783.99,987.77, 783.99,659.25,783.99,987.77, 1046.5,987.77,783.99,987.77];
+  arp.forEach((f,i)=>{
+    pluck(f, 1.6 + i*0.135, 0.30, 0.15);
+  });
+
+  // FASE 4 (3.65 - 4.95s): hook melodi penutup + chord pad kedua yang lebih terang
+  padChord([392.00,493.88,587.33,987.77], 3.65, 1.75, 3400, 1600, 0.10); // G-based pad
+  const hook = [
+    [783.99, 3.65, 0.22],
+    [987.77, 3.90, 0.22],
+    [1174.66,4.15, 0.22],
+    [1567.98,4.40, 0.55],
+  ];
+  hook.forEach(([f,t,d])=> pluck(f, t, d, 0.19));
+
+  // FASE 5: kilau shimmer penutup manis
+  setTimeout(()=>{
+    nada(3135.96, 0, 0.4, 'sine', 0.13); // G7
+    nada(2637.02, 0.05, 0.5, 'sine', 0.11); // E7
+  }, 4700);
+}
+function suaraDetik(){
+  // suara "tik" pendek untuk hitung mundur 3-2-1
+  nada(1500, 0, 0.06, 'square', 0.12);
+}
+function suaraKlik(){
+  // suara "ck/klik" ringan saat memencet tombol pilihan/opsi
+  nada(1800, 0, 0.03, 'square', 0.06);
+}
+function bisingPutih(durasi, volume, waktuMulai, freqFilter){
+  const ctx = getAudioCtx();
+  const bufferSize = Math.floor(ctx.sampleRate * durasi);
+  const buffer = ctx.createBuffer(1, bufferSize, ctx.sampleRate);
+  const data = buffer.getChannelData(0);
+  for(let i=0;i<bufferSize;i++){ data[i] = (Math.random()*2-1); }
+  const src = ctx.createBufferSource();
+  src.buffer = buffer;
+  const gain = ctx.createGain();
+  gain.gain.setValueAtTime(0, ctx.currentTime + (waktuMulai||0));
+  gain.gain.linearRampToValueAtTime(volume, ctx.currentTime + (waktuMulai||0) + 0.01);
+  gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + (waktuMulai||0) + durasi);
+  const filter = ctx.createBiquadFilter();
+  filter.type = 'bandpass';
+  filter.frequency.value = freqFilter || 2200;
+  src.connect(filter).connect(gain).connect(ctx.destination);
+  src.start(ctx.currentTime + (waktuMulai||0));
+}
+function suaraTepukTangan(){
+  // simulasi tepuk tangan meriah: rentetan burst noise padat + gemuruh latar
+  const ctx = getAudioCtx();
+  // gemuruh latar tepuk tangan panjang
+  bisingPutih(2.2, 0.10, 0, 3500);
+  let t = 0;
+  for(let i=0;i<45;i++){
+    bisingPutih(0.06 + Math.random()*0.04, 0.16 + Math.random()*0.10, t, 2000 + Math.random()*2500);
+    t += 0.03 + Math.random()*0.045;
+  }
+}
+// Pool buffer noise dibuat SEKALI SAJA (bukan digenerate ulang tiap tepukan) supaya loop tepuk
+// tangan yang berjumlah ratusan tidak membebani prosesor & suara bisa langsung mulai tanpa jeda.
+let poolNoiseTepuk = null;
+function ambilBufferTepuk(){
+  const ctx = getAudioCtx();
+  if(!poolNoiseTepuk){
+    const durasiList = [0.03, 0.04, 0.05, 0.06];
+    poolNoiseTepuk = durasiList.map(dur=>{
+      const bufferSize = Math.max(1, Math.floor(ctx.sampleRate * dur));
+      const buffer = ctx.createBuffer(1, bufferSize, ctx.sampleRate);
+      const data = buffer.getChannelData(0);
+      for(let i=0;i<bufferSize;i++){ data[i] = Math.random()*2-1; }
+      return buffer;
+    });
+  }
+  return poolNoiseTepuk[Math.floor(Math.random()*poolNoiseTepuk.length)];
+}
+function tepukSatu(mulai, volume, panPos){
+  // Satu "smack" tepukan realistis: 2 burst noise tumpang-tindih dgn selisih waktu sangat kecil
+  // (meniru bunyi telapak tangan bertemu - bukan cuma satu noise polos), lewat bandpass 1.2-3kHz
+  // (rentang frekuensi khas suara tepukan tangan manusia), plus panning kiri-kanan utk kesan lebar/kerumunan.
+  const ctx = getAudioCtx();
+  const jumlahBurst = 2;
+  for(let j=0;j<jumlahBurst;j++){
+    const buffer = ambilBufferTepuk();
+    const dur = buffer.duration;
+    const delayJ = j*0.007;
+    const src = ctx.createBufferSource();
+    src.buffer = buffer;
+    const filter = ctx.createBiquadFilter();
+    filter.type = 'bandpass';
+    filter.frequency.value = 1200 + Math.random()*1900;
+    filter.Q.value = 1.0 + Math.random()*0.6;
+    const gain = ctx.createGain();
+    const waktuMulai = ctx.currentTime + mulai + delayJ;
+    gain.gain.setValueAtTime(0, waktuMulai);
+    gain.gain.linearRampToValueAtTime(volume, waktuMulai + 0.004);
+    gain.gain.exponentialRampToValueAtTime(0.001, waktuMulai + dur);
+    src.connect(filter);
+    if(ctx.createStereoPanner){
+      const panner = ctx.createStereoPanner();
+      panner.pan.value = panPos !== undefined ? panPos : (Math.random()*2-1);
+      filter.connect(panner);
+      panner.connect(gain);
+    } else {
+      filter.connect(gain);
+    }
+    gain.connect(ctx.destination);
+    src.start(waktuMulai);
+    src.stop(waktuMulai + dur + 0.01);
+  }
+}
+function suaraHore(){
+  mainkanFile(['sounds/hore.m4a','sounds/hore.mp3'], 0.95, suaraHoreSintesis);
+}
+function suaraHoreSintesis(){
+  // Suara "Horeee!" ramai simulasi beberapa anak - MURNI oscillator (bukan noise buffer, bukan
+  // text-to-speech), jadi sangat ringan secara komputasi & pasti bunyi di semua browser tanpa
+  // tergantung dukungan TTS perangkat. Tiap "anak" disimulasikan lewat kontur nada naik-turun
+  // cepat (meniru teriakan "woo-hoo!") dengan pitch, waktu, dan posisi kiri-kanan berbeda-beda.
+  const ctx = getAudioCtx();
+  const jumlahAnak = 6;
+  for(let i=0;i<jumlahAnak;i++){
+    const mulai = Math.random()*0.4;
+    const durasi = 0.5 + Math.random()*0.35;
+    const pitchDasar = 480 + Math.random()*480; // tiap "anak" beda tinggi suara dasarnya
+    const puncakWaktu = mulai + durasi*0.4;
+
+    const osc = ctx.createOscillator();
+    const gain = ctx.createGain();
+    osc.type = Math.random() > 0.5 ? 'triangle' : 'sawtooth';
+    osc.frequency.setValueAtTime(pitchDasar*0.75, ctx.currentTime + mulai);
+    osc.frequency.exponentialRampToValueAtTime(pitchDasar*1.7, ctx.currentTime + puncakWaktu);
+    osc.frequency.exponentialRampToValueAtTime(pitchDasar*0.9, ctx.currentTime + mulai + durasi);
+    gain.gain.setValueAtTime(0, ctx.currentTime + mulai);
+    gain.gain.linearRampToValueAtTime(0.24 + Math.random()*0.12, ctx.currentTime + mulai + 0.08);
+    gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + mulai + durasi);
+
+    if(ctx.createStereoPanner){
+      const panner = ctx.createStereoPanner();
+      panner.pan.value = (Math.random()*2-1)*0.8;
+      osc.connect(panner); panner.connect(gain);
+    } else {
+      osc.connect(gain);
+    }
+    gain.connect(ctx.destination);
+    osc.start(ctx.currentTime + mulai);
+    osc.stop(ctx.currentTime + mulai + durasi + 0.03);
+  }
+  // kilau nada ceria menyertai sebagai bumbu perayaan
+  nada(783.99, 0,    0.16, 'triangle', 0.26); // G5
+  nada(1046.5, 0.10, 0.16, 'triangle', 0.26); // C6
+  nada(1318.5, 0.20, 0.30, 'triangle', 0.24); // E6
+}
+function suaraItsOk(){
+  mainkanFile(['sounds/itsok.m4a','sounds/itsok.mp3'], 0.9, suaraItsOkSintesis);
+}
+function suaraItsOkSintesis(){
+  // Suara penyemangat lembut untuk nilai 80-89 - MURNI oscillator (bukan text-to-speech, supaya
+  // pasti bunyi di semua browser tanpa tergantung dukungan TTS perangkat). Dua nada turun pelan
+  // & hangat memberi kesan "tenang, tidak apa-apa", diikuti nada kecil ceria di akhir sebagai
+  // dorongan semangat.
+  nada(659.25, 0,    0.22, 'sine', 0.26); // E5 - nada menenangkan
+  nada(523.25, 0.20, 0.30, 'sine', 0.24); // C5 - turun pelan, hangat
+  nada(659.25, 0.55, 0.18, 'triangle', 0.22); // E5 - kecil, dorongan semangat penutup
+  nada(783.99, 0.68, 0.24, 'triangle', 0.20); // G5 - penutup ceria
+}
+function suaraFirework(){
+  mainkanFile(['sounds/firework.m4a','sounds/firework.mp3'], 0.9, suaraFireworkSintesis);
+}
+function suaraFireworkSintesis(){
+  // simulasi rentetan ledakan kembang api yang ramai & panjang (banyak ledakan bersahutan)
+  const ctx = getAudioCtx();
+  const jumlahLedakan = 10;
+  for(let i=0;i<jumlahLedakan;i++){
+    const delay = i*0.32 + Math.random()*0.25;
+    const besar = Math.random() > 0.5;
+    // dentuman peluncuran (whoosh naik)
+    const whoosh = ctx.createOscillator();
+    const whooshGain = ctx.createGain();
+    whoosh.type = 'sine';
+    whoosh.frequency.setValueAtTime(300, ctx.currentTime + delay);
+    whoosh.frequency.exponentialRampToValueAtTime(1200, ctx.currentTime + delay + 0.18);
+    whooshGain.gain.setValueAtTime(0.05, ctx.currentTime + delay);
+    whooshGain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + delay + 0.2);
+    whoosh.connect(whooshGain).connect(ctx.destination);
+    whoosh.start(ctx.currentTime + delay);
+    whoosh.stop(ctx.currentTime + delay + 0.22);
+
+    // ledakan (noise + nada melengking turun)
+    const tLedak = delay + 0.2;
+    bisingPutih(besar ? 0.5 : 0.32, besar ? 0.24 : 0.16, tLedak, besar ? 1400 : 2600);
+    const osc = ctx.createOscillator();
+    const gain = ctx.createGain();
+    osc.type = 'sawtooth';
+    osc.frequency.setValueAtTime(besar ? 1200 : 900, ctx.currentTime + tLedak);
+    osc.frequency.exponentialRampToValueAtTime(70, ctx.currentTime + tLedak + (besar?0.55:0.4));
+    gain.gain.setValueAtTime(besar ? 0.16 : 0.12, ctx.currentTime + tLedak);
+    gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + tLedak + (besar?0.6:0.45));
+    osc.connect(gain).connect(ctx.destination);
+    osc.start(ctx.currentTime + tLedak);
+    osc.stop(ctx.currentTime + tLedak + (besar?0.65:0.5));
+  }
+}
+
+/* ══════════════════ ANIMASI FIREWORK (canvas) ══════════════════ */
+function tampilkanFirework(){
+  const canvas = document.createElement('canvas');
+  canvas.id = 'fireworkCanvas';
+  canvas.style.cssText = 'position:fixed; inset:0; pointer-events:none; z-index:100;';
+  document.body.appendChild(canvas);
+  const ctx2d = canvas.getContext('2d');
+  function resize(){ canvas.width = window.innerWidth; canvas.height = window.innerHeight; }
+  resize();
+  window.addEventListener('resize', resize);
+
+  const warnaLedakan = ['#ff5252','#ffd740','#69f0ae','#40c4ff','#e040fb','#ff6e40','#eeff41','#ff4081','#18ffff'];
+  let partikel = [];
+
+  function buatLedakan(x, y){
+    const warna = warnaLedakan[Math.floor(Math.random()*warnaLedakan.length)];
+    const warna2 = warnaLedakan[Math.floor(Math.random()*warnaLedakan.length)];
+    const jumlah = 70;
+    for(let i=0;i<jumlah;i++){
+      const sudut = (Math.PI*2*i)/jumlah + Math.random()*0.1;
+      const kecepatan = 2.5 + Math.random()*4.5;
+      partikel.push({
+        x, y,
+        vx: Math.cos(sudut)*kecepatan,
+        vy: Math.sin(sudut)*kecepatan,
+        hidup: 1,
+        warna: Math.random() > 0.5 ? warna : warna2,
+        ukuran: 2 + Math.random()*2.5
+      });
+    }
+  }
+
+  let jumlahLedakan = 0;
+  const maxLedakan = 16;
+  const timerLedakan = setInterval(()=>{
+    if(jumlahLedakan >= maxLedakan){ clearInterval(timerLedakan); return; }
+    const x = canvas.width*0.15 + Math.random()*canvas.width*0.7;
+    const y = canvas.height*0.12 + Math.random()*canvas.height*0.45;
+    buatLedakan(x, y);
+    // sesekali ledakan ganda beruntun supaya makin ramai
+    if(Math.random() > 0.55){
+      setTimeout(()=>{
+        const x2 = canvas.width*0.15 + Math.random()*canvas.width*0.7;
+        const y2 = canvas.height*0.12 + Math.random()*canvas.height*0.45;
+        buatLedakan(x2, y2);
+      }, 120);
+    }
+    jumlahLedakan++;
+  }, 320);
+
+  let frameHandle;
+  function animasi(){
+    ctx2d.clearRect(0,0,canvas.width,canvas.height);
+    partikel.forEach(p=>{
+      p.x += p.vx;
+      p.y += p.vy;
+      p.vy += 0.04; // gravitasi ringan
+      p.hidup -= 0.012;
+    });
+    partikel = partikel.filter(p=>p.hidup > 0);
+    partikel.forEach(p=>{
+      ctx2d.globalAlpha = Math.max(p.hidup, 0);
+      ctx2d.fillStyle = p.warna;
+      ctx2d.beginPath();
+      ctx2d.arc(p.x, p.y, p.ukuran, 0, Math.PI*2);
+      ctx2d.fill();
+    });
+    ctx2d.globalAlpha = 1;
+    if(jumlahLedakan < maxLedakan || partikel.length > 0){
+      frameHandle = requestAnimationFrame(animasi);
+    } else {
+      cancelAnimationFrame(frameHandle);
+      window.removeEventListener('resize', resize);
+      canvas.remove();
+    }
+  }
+  animasi();
+}
+
+const WARNA_KOTAK = ["#e94560","#f5a623","#4CAF50","#0f3460","#9c27b0","#00bcd4","#ff5722","#3f51b5","#795548","#607d8b"];
+
+let state = {
+  durasiTimer: 15,
+  mode: null,
+  skor: 0,
+  riwayat: [],
+  ulangan: [],
+  ulanganHitung: {},
+  sudahJawab: false,
+  daftarSoal: [],
+  idxSoal: 0,
+  soalSkrg: null,
+  jwbBenar: 0,
+  pilihanSelected: new Set(),
+  pilihanJumlah: 20,
+  timerVal: 15,
+  timerHandle: null,
+};
+
+const app = document.getElementById('app');
+function render(html, extraClass){
+  app.innerHTML = `<div class="frame ${extraClass||''}">${html}</div>`;
+}
+function backBtn(fn, label, extraClass){
+  const b = document.createElement('button');
+  b.className = 'back-btn' + (extraClass ? ' ' + extraClass : '');
+  b.textContent = '◀  ' + (label || 'Kembali');
+  b.onclick = fn;
+  app.appendChild(b);
+}
+function clearTimerHandle(){
+  if(state.timerHandle){ clearInterval(state.timerHandle); state.timerHandle=null; }
+}
+
+/* ══════════════════ MENU UTAMA ══════════════════ */
+function halamanMenuUtama(){
+  clearTimerHandle();
+  render(`
+    <div class="menu-wrap" style="display:flex;flex-direction:column;align-items:center;">
+      <div class="banner-sub">✦ SUPER ✦</div>
+      <div class="banner-title">GAME PERKALIAN</div>
+      <div class="banner-tag">— Asah Otak, Raih Nilai Sempurna! —</div>
+      <div class="kotak-row">
+        <div class="kotak" id="kTabel" style="background:var(--aksen2)">
+          <div class="emoji">📊</div><div class="lbl">TABEL\nPERKALIAN</div>
+        </div>
+        <div class="kotak" id="kTes" style="background:var(--aksen1)">
+          <div class="emoji">🎮</div><div class="lbl">TES\nPERKALIAN</div>
+        </div>
+      </div>
+    </div>
+    <div class="credit">Created by Hendra</div>
+  `, 'menu-wrap');
+  document.getElementById('kTabel').onclick = halamanTabel;
+  document.getElementById('kTes').onclick = halamanMenuTes;
+}
+
+/* ══════════════════ TABEL PERKALIAN ══════════════════ */
+function halamanTabel(){
+  clearTimerHandle();
+  let grid = '';
+  for(let i=1;i<=10;i++){
+    grid += `<button class="btn" style="background:${WARNA_KOTAK[i-1]}" onclick="halamanIsiTabel(${i})">×  ${i}</button>`;
+  }
+  render(`
+    <h2 class="judul">📊 TABEL PERKALIAN</h2>
+    <div class="subteks">Pilih tabel yang ingin dilihat:</div>
+    <div class="grid-tabel">${grid}</div>
+  `);
+  backBtn(halamanMenuUtama);
+}
+
+function halamanIsiTabel(n){
+  clearTimerHandle();
+  let rows = '';
+  for(let i=1;i<=10;i++){
+    const fg = i%2===0 ? 'var(--hijau)' : 'var(--teks)';
+    rows += `<div style="color:${fg}">   ${n}  ×  ${i}  =  ${n*i}   </div>`;
+  }
+  render(`
+    <h2 class="judul">✦ Tabel Perkalian ${n} ✦</h2>
+    <div class="baris-tabel">${rows}</div>
+  `);
+  backBtn(halamanTabel);
+}
+
+/* ══════════════════ MENU TES ══════════════════ */
+function halamanMenuTes(){
+  clearTimerHandle();
+  let tblBtns = '';
+  for(let i=1;i<=10;i++){
+    tblBtns += `<button class="btn" style="background:${WARNA_KOTAK[i-1]}" onclick="mulai(['tabel',${i}])">Perkalian ${i}</button>`;
+  }
+  render(`
+    <h2 class="judul aksen-judul">🎮 TES PERKALIAN</h2>
+    <div class="timer-row">
+      <span style="color:var(--teks);font-weight:bold;font-size:13px;">⏱ Waktu per soal:</span>
+      <input type="number" id="inpTimer" min="1" max="15" value="${state.durasiTimer}">
+      <span style="color:var(--abu);font-size:12px;">detik (1–15)</span>
+    </div>
+    <div class="label-sub">── PILIH TABEL ──</div>
+    <div class="grid-pilih-tabel">${tblBtns}</div>
+    <div class="label-sub">── MODE CAMPUR ──</div>
+    <div class="col-campur">
+      <button class="btn" style="background:var(--aksen2)" onclick="mulai(['campur',1,5])">🔀 Campur 1 – 5</button>
+      <button class="btn" style="background:var(--aksen2)" onclick="mulai(['campur',6,10])">🔀 Campur 6 – 10</button>
+      <button class="btn" style="background:var(--aksen2)" onclick="mulai(['campur',1,10])">🔀 Campur 1 – 10</button>
+      <button class="btn" style="background:var(--kuning); color:var(--bg)" onclick="halamanPilihanCampur()">🎯 Perkalian Pilihan</button>
+    </div>
+  `);
+  backBtn(halamanMenuUtama);
+}
+
+/* ══════════════════ PERKALIAN PILIHAN ══════════════════ */
+function halamanPilihanCampur(){
+  clearTimerHandle();
+  let tblBtns = '';
+  for(let i=1;i<=10;i++){
+    const sel = state.pilihanSelected.has(i);
+    tblBtns += `<button class="btn" id="pilTbl${i}" style="background:${sel?'var(--hijau)':WARNA_KOTAK[i-1]}" onclick="toggleTabelPilihan(${i})">${sel?'✓ ':''}Perkalian ${i}</button>`;
+  }
+  let jmlBtns = '';
+  [10,15,20,30].forEach(n=>{
+    jmlBtns += `<button class="btn" id="jml${n}" style="background:${state.pilihanJumlah===n?'var(--aksen1)':'var(--aksen2)'}" onclick="pilihJumlah(${n})">${n}</button>`;
+  });
+  render(`
+    <h2 class="judul">🎯 PERKALIAN PILIHAN</h2>
+    <div class="subteks">Pilih tabel perkalian yang ingin dimainkan (boleh lebih dari satu):</div>
+    <div class="grid-pilih5">${tblBtns}</div>
+    <div class="label-sub">── JUMLAH SOAL ──</div>
+    <div class="jumlah-row">${jmlBtns}</div>
+    <div class="peringatan" id="peringatan"></div>
+    <button class="btn mulai-btn" onclick="mulaiPilihanCampur()">▶ MULAI</button>
+  `);
+  backBtn(halamanMenuTes);
+}
+function toggleTabelPilihan(n){
+  if(state.pilihanSelected.has(n)) state.pilihanSelected.delete(n);
+  else state.pilihanSelected.add(n);
+  halamanPilihanCampur();
+}
+function pilihJumlah(n){
+  state.pilihanJumlah = n;
+  halamanPilihanCampur();
+}
+function mulaiPilihanCampur(){
+  if(state.pilihanSelected.size === 0){
+    document.getElementById('peringatan').textContent = '⚠ Pilih minimal 1 tabel perkalian dahulu!';
+    return;
+  }
+  const tabelList = Array.from(state.pilihanSelected).sort((a,b)=>a-b);
+  mulai(['campur_pilihan', tabelList, state.pilihanJumlah]);
+}
+
+/* ══════════════════ SESI TES ══════════════════ */
+function shuffle(arr){
+  for(let i=arr.length-1;i>0;i--){
+    const j = Math.floor(Math.random()*(i+1));
+    [arr[i],arr[j]]=[arr[j],arr[i]];
+  }
+  return arr;
+}
+function buatDaftar(mode){
+  if(mode[0]==='tabel'){
+    const n = mode[1];
+    const angka = shuffle([1,2,3,4,5,6,7,8,9,10]);
+    return angka.map(b=>[n,b]);
+  } else if(mode[0]==='campur_pilihan'){
+    const [_, tabelList, jumlah] = mode;
+    let pool = [];
+    tabelList.forEach(a=>{ for(let b=1;b<=10;b++) pool.push([a,b]); });
+    pool = shuffle(pool);
+    if(jumlah <= pool.length) return pool.slice(0,jumlah);
+    let hasil = [];
+    while(hasil.length < jumlah){
+      hasil = hasil.concat(shuffle(pool.slice()));
+    }
+    return hasil.slice(0,jumlah);
+  } else {
+    const [_, lo, hi] = mode;
+    let pool = [];
+    for(let a=lo;a<=hi;a++) for(let b=1;b<=10;b++) pool.push([a,b]);
+    pool = shuffle(pool);
+    return pool.slice(0,20);
+  }
+}
+function mulai(mode){
+  const nilai = parseInt(document.getElementById('inpTimer')?.value || state.durasiTimer);
+  const durasi = (nilai>=1 && nilai<=15) ? nilai : state.durasiTimer;
+  state.durasiTimer = durasi;
+  state.mode = mode;
+  state.skor = 0;
+  state.riwayat = [];
+  state.ulangan = [];
+  state.ulanganHitung = {};
+  state.sudahJawab = false;
+  state.daftarSoal = buatDaftar(mode);
+  state.idxSoal = 0;
+  suaraIntro();
+  tampilSoal();
+}
+function tambahUlangan(a,b){
+  const key = a+'_'+b;
+  if(state.mode[0]==='campur' || state.mode[0]==='campur_pilihan'){
+    const hitung = state.ulanganHitung[key] || 0;
+    if(hitung < 2){
+      state.ulanganHitung[key] = hitung+1;
+      state.ulangan.push([a,b]);
+    }
+  } else {
+    if(!state.ulangan.some(p=>p[0]===a && p[1]===b)) state.ulangan.push([a,b]);
+  }
+}
+
+function tampilSoal(){
+  clearTimerHandle();
+  state.sudahJawab = false;
+  const bg = WARNA_SOAL[Math.floor(Math.random()*WARNA_SOAL.length)];
+
+  let fase = '';
+  if(state.idxSoal < state.daftarSoal.length){
+    state.soalSkrg = state.daftarSoal[state.idxSoal];
+    state.idxSoal++;
+  } else if(state.ulangan.length){
+    state.soalSkrg = state.ulangan.shift();
+    fase = '  🔁 Ulangan';
+  } else {
+    tampilHasil();
+    return;
+  }
+
+  const [a,b] = state.soalSkrg;
+  state.jwbBenar = a*b;
+  const totalSudah = state.riwayat.length;
+  state.timerVal = state.durasiTimer;
+
+  render(`
+    <div class="soal-header">Soal ke-${totalSudah+1}${fase}   |   Benar: ${state.skor}</div>
+    <div class="timer-lbl" id="timerLbl">⏰  ${state.timerVal}</div>
+    <div class="soal-center-col">
+      <div class="soal-row">
+        <span>${a}  x  ${b}  =</span>
+        <input type="tel" inputmode="none" id="entryJwb" autocomplete="off" readonly>
+      </div>
+      <div id="fbCircleWrap"></div>
+      <div class="info-fb" id="infoFb"></div>
+    </div>
+    <div class="numpad-footer">
+      <div class="numpad" id="numpad"></div>
+      <button class="btn jawab-btn" id="btnJawab">✔ Jawab</button>
+    </div>
+  `, 'soal-frame');
+  app.querySelector('.frame').style.background = bg;
+
+  backBtn(halamanMenuTes, null, 'back-btn-soal');
+
+  const entry = document.getElementById('entryJwb');
+  document.getElementById('btnJawab').onclick = cekJawaban;
+
+  // numpad selalu tampil, cocok untuk layar sentuh (HP/iPad) maupun mouse
+  const numpad = document.getElementById('numpad');
+  let npHtml = '';
+  for(let n=1;n<=9;n++) npHtml += `<button onclick="numpadInput(${n})">${n}</button>`;
+  npHtml += `<button class="num-clear" onclick="numpadInput('clear')">C</button>`;
+  npHtml += `<button onclick="numpadInput(0)">0</button>`;
+  npHtml += `<button class="num-del" onclick="numpadInput('del')">⌫</button>`;
+  numpad.innerHTML = npHtml;
+
+  hitungMundur();
+}
+function numpadInput(v){
+  if(state.sudahJawab) return;
+  const entry = document.getElementById('entryJwb');
+  if(!entry) return;
+  if(v==='del') entry.value = entry.value.slice(0,-1);
+  else if(v==='clear') entry.value = '';
+  else if(entry.value.length < 6) entry.value += v;
+}
+
+function hitungMundur(){
+  clearTimerHandle();
+  state.timerHandle = setInterval(()=>{
+    if(state.sudahJawab){ clearTimerHandle(); return; }
+    const lbl = document.getElementById('timerLbl');
+    if(!lbl){ clearTimerHandle(); return; }
+    lbl.textContent = `⏰  ${state.timerVal}`;
+    lbl.style.color = state.timerVal <= 5 ? 'var(--aksen1)' : 'var(--teks)';
+
+    if(state.timerVal <= 0){
+      clearTimerHandle();
+      state.sudahJawab = true;
+      nonaktifkanInput();
+      const info = document.getElementById('infoFb');
+      if(info){ info.textContent = `⏰ Waktu habis!  Jawaban: ${state.jwbBenar}`; info.style.color='var(--kuning)'; }
+      const [a,b] = state.soalSkrg;
+      state.riwayat.push(['habis',a,b,state.jwbBenar]);
+      tambahUlangan(a,b);
+      tampilFeedbackBesar(false);
+      suaraWaktuHabis();
+      setTimeout(tampilSoal, 1800);
+      return;
+    }
+    // suara "tik" tiap detik saat hitung mundur tersisa 3, 2, 1
+    if(state.timerVal <= 3 && state.timerVal >= 1){
+      suaraDetik();
+    }
+    state.timerVal -= 1;
+  }, 1000);
+}
+
+function cekJawaban(){
+  if(state.sudahJawab) return;
+  const entry = document.getElementById('entryJwb');
+  const val = entry.value.trim();
+  if(val === '' || isNaN(val)){
+    const info = document.getElementById('infoFb');
+    info.textContent = '⚠ Masukkan angka!'; info.style.color='var(--abu)';
+    return;
+  }
+  const jawab = parseInt(val);
+  state.sudahJawab = true;
+  clearTimerHandle();
+  nonaktifkanInput();
+
+  const [a,b] = state.soalSkrg;
+  const info = document.getElementById('infoFb');
+  if(jawab === state.jwbBenar){
+    state.skor += 1;
+    info.textContent = 'BENAR!  Hebat!'; info.style.color='#69f0ae';
+    state.riwayat.push(['benar',a,b,state.jwbBenar]);
+    tampilFeedbackBesar(true);
+    suaraBenar();
+  } else {
+    info.textContent = `SALAH!  Jawaban: ${state.jwbBenar}`; info.style.color='var(--aksen1)';
+    state.riwayat.push(['salah',a,b,state.jwbBenar]);
+    tambahUlangan(a,b);
+    tampilFeedbackBesar(false);
+    suaraSalah();
+  }
+  setTimeout(tampilSoal, 1500);
+}
+function nonaktifkanInput(){
+  const btn = document.getElementById('btnJawab');
+  const entry = document.getElementById('entryJwb');
+  if(btn) btn.disabled = true;
+  if(entry) entry.disabled = true;
+}
+function tampilFeedbackBesar(benar){
+  const wrap = document.getElementById('fbCircleWrap');
+  if(!wrap) return;
+  wrap.innerHTML = `<div class="feedback-circle ${benar?'fb-benar':'fb-salah'}">${benar?'✓':'✕'}</div>`;
+}
+
+/* ══════════════════ HASIL ══════════════════ */
+function tampilHasil(){
+  clearTimerHandle();
+  const total = state.riwayat.length;
+  const benar = state.skor;
+  const salah = state.riwayat.filter(r=>r[0]==='salah').length;
+  const habis = state.riwayat.filter(r=>r[0]==='habis').length;
+  const nilai = total ? Math.round(benar/total*100) : 0;
+
+  let emoji, pesan;
+  if(nilai===100){ emoji='🏆'; pesan='SEMPURNA!'; }
+  else if(nilai>=80){ emoji='🥇'; pesan='Luar Biasa!'; }
+  else if(nilai>=60){ emoji='🥈'; pesan='Bagus!'; }
+  else if(nilai>=40){ emoji='🥉'; pesan='Terus Berlatih!'; }
+  else { emoji='💪'; pesan='Jangan Menyerah!'; }
+
+  const warnaNilai = nilai===100 ? '#ffd700' : nilai>=80 ? '#69f0ae' : nilai>=60 ? 'var(--kuning)' : 'var(--aksen1)';
+
+  let riwayatHtml = '';
+  state.riwayat.forEach((r,idx)=>{
+    const [status,a,b,jwb] = r;
+    const ikon = status==='benar' ? '✅' : status==='salah' ? '❌' : '⏰';
+    const fg = status==='benar' ? '#69f0ae' : status==='salah' ? 'var(--aksen1)' : 'var(--kuning)';
+    riwayatHtml += `<div style="color:${fg}">  ${String(idx+1).padStart(2,' ')}. ${a} x ${b} = ${jwb}  ${ikon}</div>`;
+  });
+
+  render(`
+    <h2 class="judul" style="color:var(--putih)">${emoji}  ${pesan}</h2>
+    <div class="hasil-top">
+      <div class="nilai-besar" style="color:${warnaNilai}">${nilai}</div>
+      <div class="rekap">
+        <div style="color:var(--teks)">Total soal : ${total}</div>
+        <div style="color:#69f0ae">✅ Benar  : ${benar}</div>
+        <div style="color:var(--aksen1)">❌ Salah  : ${salah}</div>
+        <div style="color:var(--kuning)">⏰ Waktu habis  : ${habis}</div>
+      </div>
+    </div>
+    <div class="label-sub">── RIWAYAT JAWABAN ──</div>
+    <div class="riwayat-box">${riwayatHtml}</div>
+    <div class="hasil-btn-row">
+      <button class="btn" style="background:var(--aksen2)" id="btnLagi">🔄 Main Lagi</button>
+      <button class="btn" style="background:#555" id="btnMenu">🏠 Menu Utama</button>
+    </div>
+  `);
+  document.getElementById('btnLagi').onclick = ()=>mulaiUlang();
+  document.getElementById('btnMenu').onclick = halamanMenuUtama;
+
+  // Jika nilai di atas 90: rayakan dengan suara tepuk tangan + kembang api & animasi firework
+  // Perayaan bertingkat sesuai nilai akhir:
+  //  100      -> kembang api (suara + animasi)
+  //  90 - 99  -> tepuk tangan panjang (~4 detik, fade bertahap)
+  //  80 - 89  -> suara ucapan "It's ok!"
+  if(nilai === 100){
+    setTimeout(()=>{
+      suaraFirework();
+      tampilkanFirework();
+    }, 300);
+  } else if(nilai >= 90){
+    setTimeout(()=>{ suaraHore(); }, 300);
+  } else if(nilai >= 80){
+    setTimeout(()=>{ suaraItsOk(); }, 300);
+  }
+}
+function mulaiUlang(){
+  mulai(state.mode);
+}
+
+/* ══════════════════ SUARA KLIK GLOBAL untuk semua tombol pilihan/opsi ══════════════════ */
+document.addEventListener('click', (e)=>{
+  const target = e.target.closest('.btn, .numpad button, .kotak');
+  if(target){ suaraKlik(); }
+}, true);
+
+/* ══════════════════ INIT ══════════════════ */
+halamanMenuUtama();
+
+// Registrasi Service Worker (untuk mode offline & PWA di browser).
+// Dilewati otomatis kalau berjalan di dalam APK Capacitor - karena di situ semua file
+// sudah dibundel langsung ke aplikasi, jadi mekanisme cache seperti ini tidak diperlukan lagi.
+if('serviceWorker' in navigator && !window.Capacitor){
+  window.addEventListener('load', ()=>{
+    navigator.serviceWorker.register('service-worker.js').catch(err=>{
+      console.log('SW registration gagal:', err);
+    });
+  });
+}
+</script>
+</body>
+</html>
