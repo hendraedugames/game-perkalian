@@ -98,12 +98,12 @@ h2.judul{color:var(--kuning); font-size:clamp(20px,4vw,28px); margin:22px 0 6px;
 
 /* NUMPAD + TOMBOL JAWAB: default (iPad/tablet/desktop) proporsi tombol dikecilkan ~2:3 terhadap teks soal, di-center vertikal oleh .soal-frame */
 .numpad-footer{display:flex; flex-direction:column; align-items:center; margin-top:18px;}
-.numpad{display:grid; grid-template-columns:repeat(3,94px); gap:7px; justify-content:center;}
+.numpad{display:grid; grid-template-columns:repeat(3,113px); gap:7px; justify-content:center;}
 .numpad button{padding:9px 0; font-size:20px; border-radius:9px; border:none; background:var(--panel); color:var(--putih); font-weight:bold; box-shadow:0 3px 8px rgba(0,0,0,.3); width:100%;}
 .numpad button:active{transform:scale(0.94); background:#22345c;}
 .numpad button.num-del{background:var(--aksen1);}
 .numpad button.num-clear{background:#555;}
-.jawab-btn{background:var(--hijau); font-size:14px; margin-top:9px; padding:14px 0; width:calc(94px*3 + 7px*2);}
+.jawab-btn{background:var(--hijau); font-size:14px; margin-top:9px; padding:14px 0; width:calc(113px*3 + 7px*2);}
 .jawab-btn:disabled{opacity:.5;}
 
 /* HP POTRET (rasio ramping seperti iPhone/Android, bukan iPad): numpad dikunci di bawah dekat jempol,
@@ -117,9 +117,9 @@ h2.judul{color:var(--kuning); font-size:clamp(20px,4vw,28px); margin:22px 0 6px;
   .feedback-circle{width:78px; height:78px; font-size:40px;}
   #fbCircleWrap{height:88px;}
   .numpad-footer{position:fixed; left:0; right:0; bottom:52px; margin-top:0; padding:10px 0 18px; background:linear-gradient(to top, rgba(0,0,0,.45), rgba(0,0,0,0) 100%); z-index:30;}
-  .numpad{grid-template-columns:repeat(3,80px); gap:8px;}
+  .numpad{grid-template-columns:repeat(3,96px); gap:8px;}
   .numpad button{padding:7px 0; font-size:23px; border-radius:10px;}
-  .jawab-btn{width:calc(80px*3 + 8px*2); padding:13px 0; font-size:15px; margin-top:8px;}
+  .jawab-btn{width:calc(96px*3 + 8px*2); padding:13px 0; font-size:15px; margin-top:8px;}
   .back-btn-soal{z-index:40;}
 }
 
@@ -193,6 +193,20 @@ h2.judul{color:var(--kuning); font-size:clamp(20px,4vw,28px); margin:22px 0 6px;
   animation:splashBlink 1.5s ease-in-out infinite; z-index:2;
 }
 @keyframes splashBlink{ 0%,100%{opacity:.35;} 50%{opacity:1;} }
+
+/* ══════════════════ MODAL KONFIRMASI KELUAR ══════════════════ */
+.modal-keluar-overlay{
+  position:fixed; inset:0; z-index:2000; background:rgba(0,0,0,.65);
+  display:flex; align-items:center; justify-content:center; padding:24px;
+}
+.modal-keluar-box{
+  background:var(--panel); border-radius:16px; padding:28px 24px; max-width:340px; width:100%;
+  text-align:center; box-shadow:0 10px 40px rgba(0,0,0,.5);
+}
+.modal-keluar-judul{ font-size:20px; font-weight:900; color:var(--putih); margin-bottom:10px; }
+.modal-keluar-teks{ font-size:14px; color:var(--teks); line-height:1.5; margin-bottom:22px; }
+.modal-keluar-tombol{ display:flex; gap:12px; justify-content:center; }
+.modal-keluar-tombol .btn{ flex:1; padding:12px 0; font-size:14px; }
 </style>
 </head>
 <body>
@@ -773,11 +787,102 @@ const app = document.getElementById('app');
 function render(html, extraClass){
   app.innerHTML = `<div class="frame ${extraClass||''}">${html}</div>`;
 }
+/* ══════════════════ SINKRONISASI TOMBOL KEMBALI (game & tombol back HP) ══════════════════ */
+// tumpukanKembaliHP: daftar fungsi "kembali" yang berlaku baik untuk tombol Kembali di dalam
+// game MAUPUN tombol back fisik/gestur di HP - keduanya memakai persis stack yang sama supaya
+// selalu sinkron (menekan salah satu = efeknya identik).
+let tumpukanKembaliHP = [];
+let sedangDariPopstateHP = false;
+
+function catatKembali(fn){
+  // Dipanggil di awal tiap halaman yang punya "halaman sebelumnya". Kalau pemanggilan ini
+  // terjadi AKIBAT proses kembali itu sendiri (bukan navigasi maju biasa), jangan didaftarkan
+  // ulang - supaya stack tidak bertambah terus setiap kali balik.
+  if(sedangDariPopstateHP){ sedangDariPopstateHP = false; return; }
+  tumpukanKembaliHP.push(fn);
+}
+function jalankanKembali(){
+  if(tumpukanKembaliHP.length > 0){
+    sedangDariPopstateHP = true;
+    const target = tumpukanKembaliHP.pop();
+    target();
+    return true;
+  }
+  return false;
+}
+function kembaliKeMenuUtama(){
+  // Dipakai tombol "Menu Utama" eksplisit - reset total stack navigasi karena sudah balik ke akar.
+  tumpukanKembaliHP = [];
+  halamanMenuUtama();
+}
+
+// Pasang "penjaga" riwayat browser sekali di awal, supaya tombol back HP tidak langsung
+// menutup aplikasi/tab, melainkan tertangkap oleh listener popstate di bawah ini dulu.
+try{ history.pushState(null, ''); }catch(e){}
+
+window.addEventListener('popstate', ()=>{
+  const adaLayarSebelumnya = jalankanKembali();
+  if(!adaLayarSebelumnya){
+    // sudah di halaman paling awal (Menu Utama) -> tawarkan konfirmasi keluar, bukan langsung keluar
+    konfirmasiKeluar();
+    return;
+  }
+  try{ history.pushState(null, ''); }catch(e){} // pasang ulang penjaga utk tombol back berikutnya
+});
+
+// Dukungan tombol back fisik Android saat nanti dibungkus jadi APK via Capacitor (best-effort;
+// tidak berpengaruh apa-apa selama masih dibuka sebagai PWA biasa di browser).
+if(window.Capacitor && window.Capacitor.Plugins && window.Capacitor.Plugins.App && window.Capacitor.Plugins.App.addListener){
+  window.Capacitor.Plugins.App.addListener('backButton', ()=>{
+    const adaLayarSebelumnya = jalankanKembali();
+    if(!adaLayarSebelumnya){ konfirmasiKeluar(); }
+  });
+}
+
+function konfirmasiKeluar(){
+  if(document.getElementById('modalKeluar')) return; // sudah tampil, jangan dobel
+  const modal = document.createElement('div');
+  modal.id = 'modalKeluar';
+  modal.className = 'modal-keluar-overlay';
+  modal.innerHTML = `
+    <div class="modal-keluar-box">
+      <div class="modal-keluar-judul">🚪 Keluar dari Game?</div>
+      <div class="modal-keluar-teks">Apakah kamu yakin ingin keluar dari Super Game Perkalian?</div>
+      <div class="modal-keluar-tombol">
+        <button class="btn" id="btnBatalKeluar" style="background:#555;">Batal</button>
+        <button class="btn" id="btnYaKeluar" style="background:var(--aksen1);">Ya, Keluar</button>
+      </div>
+    </div>
+  `;
+  document.body.appendChild(modal);
+  document.getElementById('btnBatalKeluar').onclick = ()=>{
+    modal.remove();
+    try{ history.pushState(null, ''); }catch(e){} // pasang ulang penjaga
+  };
+  document.getElementById('btnYaKeluar').onclick = ()=>{
+    modal.remove();
+    cobaKeluarApp();
+  };
+}
+function cobaKeluarApp(){
+  if(window.Capacitor && window.Capacitor.Plugins && window.Capacitor.Plugins.App && window.Capacitor.Plugins.App.exitApp){
+    window.Capacitor.Plugins.App.exitApp();
+    return;
+  }
+  // Di browser/PWA biasa: browser modern umumnya memblokir script menutup tab yang bukan
+  // dibuka oleh script itu sendiri, jadi window.close() sering tidak berefek di sini - ini
+  // batasan bawaan browser, bukan bug. Kalau gagal, halaman cukup dibiarkan (tidak memasang
+  // ulang penjaga riwayat, jadi tombol back berikutnya akan benar-benar keluar secara native).
+  window.close();
+}
+
 function backBtn(fn, label, extraClass){
   const b = document.createElement('button');
   b.className = 'back-btn' + (extraClass ? ' ' + extraClass : '');
   b.textContent = '◀  ' + (label || 'Kembali');
-  b.onclick = fn;
+  b.onclick = ()=>{
+    if(!jalankanKembali() && fn){ fn(); } // fallback kalau stack kosong (jarang terjadi)
+  };
   app.appendChild(b);
 }
 function clearTimerHandle(){
@@ -800,16 +905,19 @@ function halamanMenuUtama(){
           <div class="emoji">🎮</div><div class="lbl">TES\nPERKALIAN</div>
         </div>
       </div>
+      <button class="btn" id="btnKeluarMenu" style="background:#3a3a3a; color:var(--abu); margin-top:26px; padding:10px 28px; font-size:13px;">✕ Keluar</button>
     </div>
     <div class="credit">Created by Hendra</div>
   `, 'menu-wrap');
   document.getElementById('kTabel').onclick = halamanTabel;
   document.getElementById('kTes').onclick = halamanMenuTes;
+  document.getElementById('btnKeluarMenu').onclick = konfirmasiKeluar;
 }
 
 /* ══════════════════ TABEL PERKALIAN ══════════════════ */
 function halamanTabel(){
   clearTimerHandle();
+  catatKembali(halamanMenuUtama);
   let grid = '';
   for(let i=1;i<=10;i++){
     grid += `<button class="btn" style="background:${WARNA_KOTAK[i-1]}" onclick="halamanIsiTabel(${i})">×  ${i}</button>`;
@@ -824,6 +932,7 @@ function halamanTabel(){
 
 function halamanIsiTabel(n){
   clearTimerHandle();
+  catatKembali(halamanTabel);
   let rows = '';
   for(let i=1;i<=10;i++){
     const fg = i%2===0 ? 'var(--hijau)' : 'var(--teks)';
@@ -839,6 +948,7 @@ function halamanIsiTabel(n){
 /* ══════════════════ MENU TES ══════════════════ */
 function halamanMenuTes(){
   clearTimerHandle();
+  catatKembali(halamanMenuUtama);
   let tblBtns = '';
   for(let i=1;i<=10;i++){
     tblBtns += `<button class="btn" style="background:${WARNA_KOTAK[i-1]}" onclick="mulai(['tabel',${i}])">Perkalian ${i}</button>`;
@@ -866,6 +976,7 @@ function halamanMenuTes(){
 /* ══════════════════ PERKALIAN PILIHAN ══════════════════ */
 function halamanPilihanCampur(){
   clearTimerHandle();
+  catatKembali(halamanMenuTes);
   let tblBtns = '';
   for(let i=1;i<=10;i++){
     const sel = state.pilihanSelected.has(i);
@@ -937,6 +1048,7 @@ function buatDaftar(mode){
   }
 }
 function mulai(mode){
+  catatKembali(halamanMenuTes);
   const nilai = parseInt(document.getElementById('inpTimer')?.value || state.durasiTimer);
   const durasi = (nilai>=1 && nilai<=15) ? nilai : state.durasiTimer;
   state.durasiTimer = durasi;
@@ -1106,6 +1218,7 @@ function tampilFeedbackBesar(benar){
 /* ══════════════════ HASIL ══════════════════ */
 function tampilHasil(){
   clearTimerHandle();
+  catatKembali(halamanMenuUtama);
   const total = state.riwayat.length;
   const benar = state.skor;
   const salah = state.riwayat.filter(r=>r[0]==='salah').length;
@@ -1148,7 +1261,7 @@ function tampilHasil(){
     </div>
   `);
   document.getElementById('btnLagi').onclick = ()=>mulaiUlang();
-  document.getElementById('btnMenu').onclick = halamanMenuUtama;
+  document.getElementById('btnMenu').onclick = kembaliKeMenuUtama;
 
   // Jika nilai di atas 90: rayakan dengan suara tepuk tangan + kembang api & animasi firework
   // Perayaan bertingkat sesuai nilai akhir:
