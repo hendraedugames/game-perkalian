@@ -37,9 +37,41 @@ html,body{margin:0; padding:0; height:100%; overflow:hidden; background:var(--bg
 .frame{position:absolute; inset:0; display:flex; flex-direction:column; align-items:center; overflow-y:auto; -webkit-overflow-scrolling:touch; padding-bottom:70px;}
 
 /* util */
-.btn{border:none; border-radius:10px; cursor:pointer; font-weight:bold; color:var(--putih); font-family:inherit; transition:transform .08s;}
-.btn:active{transform:scale(0.96);}
-.back-btn{position:fixed; left:16px; bottom:14px; background:var(--panel); color:var(--abu); border:none; border-radius:8px; padding:10px 16px; font-weight:bold; font-size:13px; cursor:pointer; z-index:50;}
+.btn{
+  border:none; border-radius:10px; cursor:pointer; font-weight:bold; color:var(--putih); font-family:inherit;
+  position:relative;
+  box-shadow:
+    0 5px 0 rgba(0,0,0,.38),
+    0 8px 14px rgba(0,0,0,.4),
+    inset 0 1px 0 rgba(255,255,255,.32),
+    0 0 14px rgba(77,208,255,.28);
+  transition: transform .09s ease, box-shadow .09s ease;
+}
+.btn:active{
+  transform: translateY(4px);
+  box-shadow:
+    0 1px 0 rgba(0,0,0,.38),
+    0 2px 6px rgba(0,0,0,.4),
+    inset 0 1px 0 rgba(255,255,255,.18),
+    0 0 6px rgba(77,208,255,.18);
+}
+.back-btn{
+  position:fixed; left:16px; bottom:14px; background:var(--panel); color:var(--abu); border:none; border-radius:8px;
+  padding:10px 16px; font-weight:bold; font-size:13px; cursor:pointer; z-index:50;
+  box-shadow:
+    0 4px 0 rgba(0,0,0,.4),
+    0 6px 10px rgba(0,0,0,.35),
+    inset 0 1px 0 rgba(255,255,255,.22),
+    0 0 10px rgba(77,208,255,.2);
+  transition: transform .09s ease, box-shadow .09s ease;
+}
+.back-btn:active{
+  transform: translateY(3px);
+  box-shadow:
+    0 1px 0 rgba(0,0,0,.4),
+    0 2px 5px rgba(0,0,0,.35),
+    inset 0 1px 0 rgba(255,255,255,.12);
+}
 
 /* MENU UTAMA */
 .menu-wrap{justify-content:center; padding-top:6vh;}
@@ -47,7 +79,24 @@ html,body{margin:0; padding:0; height:100%; overflow:hidden; background:var(--bg
 .banner-title{color:var(--aksen1); font-size:clamp(30px,7vw,56px); font-weight:900; margin:4px 0; text-align:center;}
 .banner-tag{color:var(--teks); font-style:italic; font-size:14px; margin-bottom:24px;}
 .kotak-row{display:flex; gap:24px; flex-wrap:wrap; justify-content:center; margin-top:10px;}
-.kotak{width:220px; height:140px; border-radius:16px; display:flex; flex-direction:column; align-items:center; justify-content:center; cursor:pointer; box-shadow:0 6px 18px rgba(0,0,0,.35);}
+.kotak{
+  width:220px; height:140px; border-radius:16px; display:flex; flex-direction:column; align-items:center;
+  justify-content:center; cursor:pointer;
+  box-shadow:
+    0 7px 0 rgba(0,0,0,.4),
+    0 12px 22px rgba(0,0,0,.4),
+    inset 0 2px 0 rgba(255,255,255,.3),
+    0 0 22px rgba(77,208,255,.3);
+  transition: transform .1s ease, box-shadow .1s ease;
+}
+.kotak:active{
+  transform: translateY(5px);
+  box-shadow:
+    0 2px 0 rgba(0,0,0,.4),
+    0 4px 10px rgba(0,0,0,.4),
+    inset 0 2px 0 rgba(255,255,255,.15),
+    0 0 10px rgba(77,208,255,.18);
+}
 .kotak .emoji{font-size:40px;}
 .kotak .lbl{font-weight:bold; font-size:16px; text-align:center; margin-top:6px; white-space:pre-line;}
 .credit{position:fixed; right:12px; bottom:10px; color:var(--abu); font-size:10px;}
@@ -86,7 +135,15 @@ h2.judul{color:var(--kuning); font-size:clamp(20px,4vw,28px); margin:22px 0 6px;
 /* SOAL */
 .soal-frame{justify-content:center; align-items:center; padding-top:3vh; text-align:center;}
 .soal-header{color:var(--teks); font-weight:bold; font-size:14px; margin-bottom:4px; text-align:center;}
-.timer-lbl{font-weight:bold; font-size:22px; color:var(--teks); margin-bottom:10px; text-align:center;}
+.jampasir-wrap{display:flex; flex-direction:column; align-items:center; margin-bottom:14px; perspective:400px;}
+.jampasir-3d{transform-style:preserve-3d; animation:goyangJamPasir 4s ease-in-out infinite;}
+.jampasir-svg{width:40px; height:auto; display:block;}
+.jampasir-angka{font-weight:bold; font-size:16px; color:var(--teks); margin-top:3px; text-align:center;}
+@keyframes goyangJamPasir{
+  0%{ transform: rotateY(-10deg) rotateX(4deg); }
+  50%{ transform: rotateY(10deg) rotateX(4deg); }
+  100%{ transform: rotateY(-10deg) rotateX(4deg); }
+}
 .soal-center-col{display:flex; flex-direction:column; align-items:center; width:100%;}
 .soal-row{display:flex; align-items:center; justify-content:center; gap:10px; font-size:clamp(38px,9vw,64px); font-weight:900; color:var(--putih);}
 .soal-row input{width:2.3em; text-align:center; background:var(--panel); color:var(--kuning); border:none; border-radius:10px; font-size:inherit; font-weight:inherit; padding:2px 6px;}
@@ -99,8 +156,24 @@ h2.judul{color:var(--kuning); font-size:clamp(20px,4vw,28px); margin:22px 0 6px;
 /* NUMPAD + TOMBOL JAWAB: default (iPad/tablet/desktop) proporsi tombol dikecilkan ~2:3 terhadap teks soal, di-center vertikal oleh .soal-frame */
 .numpad-footer{display:flex; flex-direction:column; align-items:center; margin-top:18px;}
 .numpad{display:grid; grid-template-columns:repeat(3,113px); gap:7px; justify-content:center;}
-.numpad button{padding:9px 0; font-size:20px; border-radius:9px; border:none; background:var(--panel); color:var(--putih); font-weight:bold; box-shadow:0 3px 8px rgba(0,0,0,.3); width:100%;}
-.numpad button:active{transform:scale(0.94); background:#22345c;}
+.numpad button{
+  padding:9px 0; font-size:20px; border-radius:9px; border:none; background:var(--panel); color:var(--putih);
+  font-weight:bold; width:100%;
+  box-shadow:
+    0 4px 0 rgba(0,0,0,.4),
+    0 7px 12px rgba(0,0,0,.35),
+    inset 0 1px 0 rgba(255,255,255,.28),
+    0 0 10px rgba(77,208,255,.22);
+  transition: transform .08s ease, box-shadow .08s ease;
+}
+.numpad button:active{
+  transform: translateY(3px);
+  background:#22345c;
+  box-shadow:
+    0 1px 0 rgba(0,0,0,.4),
+    0 2px 5px rgba(0,0,0,.35),
+    inset 0 1px 0 rgba(255,255,255,.15);
+}
 .numpad button.num-del{background:var(--aksen1);}
 .numpad button.num-clear{background:#555;}
 .jawab-btn{background:var(--hijau); font-size:14px; margin-top:9px; padding:14px 0; width:calc(113px*3 + 7px*2);}
@@ -111,7 +184,9 @@ h2.judul{color:var(--kuning); font-size:clamp(20px,4vw,28px); margin:22px 0 6px;
 @media (orientation:portrait) and (max-aspect-ratio: 3/5){
   .soal-frame{justify-content:flex-start; padding-top:4vh; padding-bottom:245px;}
   .soal-header{font-size:15px;}
-  .timer-lbl{font-size:24px; margin-bottom:10px;}
+  .jampasir-wrap{margin-bottom:10px;}
+  .jampasir-svg{width:36px;}
+  .jampasir-angka{font-size:18px;}
   .soal-row{font-size:clamp(46px,13vw,74px);}
   .info-fb{font-size:18px; height:24px;}
   .feedback-circle{width:78px; height:78px; font-size:40px;}
@@ -127,7 +202,9 @@ h2.judul{color:var(--kuning); font-size:clamp(20px,4vw,28px); margin:22px 0 6px;
 @media (orientation:landscape) and (max-height:520px){
   .soal-frame{padding-top:2vh; padding-bottom:10px;}
   .soal-header{margin-bottom:3px; font-size:13px;}
-  .timer-lbl{margin-bottom:6px; font-size:16px;}
+  .jampasir-wrap{margin-bottom:5px;}
+  .jampasir-svg{width:24px;}
+  .jampasir-angka{font-size:12px; margin-top:0;}
   .soal-row{font-size:clamp(26px,6vw,38px); gap:6px;}
   .info-fb{margin-top:5px; height:16px; font-size:12px;}
   .feedback-circle{width:50px; height:50px; font-size:26px;}
@@ -767,6 +844,7 @@ const WARNA_KOTAK = ["#e94560","#f5a623","#4CAF50","#0f3460","#9c27b0","#00bcd4"
 
 let state = {
   durasiTimer: 15,
+  jamPasirRAF: null,
   mode: null,
   skor: 0,
   riwayat: [],
@@ -816,9 +894,23 @@ function kembaliKeMenuUtama(){
   halamanMenuUtama();
 }
 
-// Pasang "penjaga" riwayat browser sekali di awal, supaya tombol back HP tidak langsung
+// Pasang "penjaga" riwayat browser di awal, supaya tombol back HP tidak langsung
 // menutup aplikasi/tab, melainkan tertangkap oleh listener popstate di bawah ini dulu.
-try{ history.pushState(null, ''); }catch(e){}
+// Dipasang 2x sebagai buffer cadangan (jaga-jaga kalau 1 entri "termakan" tanpa sempat
+// dipasang ulang - ini teknik yang sifatnya best-effort, tidak 100% terjamin di semua HP).
+try{ history.pushState(null, ''); history.pushState(null, ''); }catch(e){}
+
+// Pasang ulang penjaga setiap kali halaman kembali terlihat/aktif (misal setelah app
+// diminimize lalu dibuka lagi) - beberapa Android bisa "menghapus" penjaga saat app
+// dijeda cukup lama, jadi perlu dipasang ulang secara berkala di titik-titik aman ini.
+window.addEventListener('pageshow', ()=>{
+  try{ history.pushState(null, ''); }catch(e){}
+});
+document.addEventListener('visibilitychange', ()=>{
+  if(document.visibilityState === 'visible'){
+    try{ history.pushState(null, ''); }catch(e){}
+  }
+});
 
 window.addEventListener('popstate', ()=>{
   const adaLayarSebelumnya = jalankanKembali();
@@ -887,6 +979,49 @@ function backBtn(fn, label, extraClass){
 }
 function clearTimerHandle(){
   if(state.timerHandle){ clearInterval(state.timerHandle); state.timerHandle=null; }
+  if(state.jamPasirRAF){ cancelAnimationFrame(state.jamPasirRAF); state.jamPasirRAF=null; }
+}
+
+/* ══════════════════ ANIMASI JAM PASIR 3D (mengikuti sisa waktu soal secara halus) ══════════════════ */
+// Geometri: chamber atas y=20 (lebar penuh 80) menyempit ke leher di y=100 (lebar 0).
+// chamber bawah y=100 (lebar 0) melebar ke y=180 (lebar penuh 80). Pusat x=60.
+function tepiAtas(y){ const hw = 0.5*(100-y); return [60-hw, 60+hw]; }
+function tepiBawah(y){ const hw = 0.5*(y-100); return [60-hw, 60+hw]; }
+
+function updateJamPasir(frac){
+  frac = Math.max(0, Math.min(1, frac));
+  const pasirAtas = document.getElementById('pasirAtas');
+  const pasirBawah = document.getElementById('pasirBawah');
+  const alir = document.getElementById('alirPasir');
+  if(!pasirAtas || !pasirBawah) return; // layar sudah berpindah, hentikan update
+
+  const yTop = 20 + 80*(1-frac);          // permukaan pasir atas: 20 (penuh) -> 100 (habis)
+  const [lt, rt] = tepiAtas(yTop);
+  pasirAtas.setAttribute('points', `${lt},${yTop} ${rt},${yTop} 60,100`);
+
+  const elapsed = 1 - frac;
+  const yBot = 180 - 80*elapsed;          // tumpukan pasir bawah: 180 (kosong) -> 100 (penuh)
+  const [lb, rb] = tepiBawah(yBot);
+  pasirBawah.setAttribute('points', `${lb},${yBot} ${rb},${yBot} 100,180 20,180`);
+
+  if(alir) alir.style.opacity = frac > 0.005 ? '0.95' : '0';
+}
+
+function mulaiAnimasiJamPasir(durasiDetik){
+  const totalMs = durasiDetik * 1000;
+  const mulaiMs = performance.now();
+  function frame(){
+    if(state.sudahJawab){ return; } // berhenti begitu soal terjawab/waktu habis - pasir "membeku"
+    const elapsedMs = performance.now() - mulaiMs;
+    const frac = Math.max(0, 1 - elapsedMs/totalMs);
+    updateJamPasir(frac);
+    if(frac > 0 && !state.sudahJawab){
+      state.jamPasirRAF = requestAnimationFrame(frame);
+    }
+  }
+  if(state.jamPasirRAF) cancelAnimationFrame(state.jamPasirRAF);
+  updateJamPasir(1); // mulai penuh di atas
+  state.jamPasirRAF = requestAnimationFrame(frame);
 }
 
 /* ══════════════════ MENU UTAMA ══════════════════ */
@@ -1100,7 +1235,70 @@ function tampilSoal(){
 
   render(`
     <div class="soal-header">Soal ke-${totalSudah+1}${fase}   |   Benar: ${state.skor}</div>
-    <div class="timer-lbl" id="timerLbl">⏰  ${state.timerVal}</div>
+    <div class="jampasir-wrap">
+      <div class="jampasir-3d" id="jampasir3d">
+      <svg id="svgJamPasir" class="jampasir-svg" viewBox="0 0 120 200" xmlns="http://www.w3.org/2000/svg" style="filter:drop-shadow(0 6px 8px rgba(0,0,0,.5));">
+        <defs>
+          <linearGradient id="kacaGrad" x1="0" y1="0" x2="1" y2="0">
+            <stop offset="0%" stop-color="rgba(120,160,200,0.35)"/>
+            <stop offset="18%" stop-color="rgba(255,255,255,0.08)"/>
+            <stop offset="42%" stop-color="rgba(255,255,255,0.55)"/>
+            <stop offset="60%" stop-color="rgba(255,255,255,0.10)"/>
+            <stop offset="100%" stop-color="rgba(80,110,150,0.4)"/>
+          </linearGradient>
+          <linearGradient id="kayuSisi" x1="0" y1="0" x2="1" y2="0">
+            <stop offset="0%" stop-color="#3a2410"/>
+            <stop offset="25%" stop-color="#8a5a2b"/>
+            <stop offset="50%" stop-color="#c69256"/>
+            <stop offset="75%" stop-color="#6b4522"/>
+            <stop offset="100%" stop-color="#2a1808"/>
+          </linearGradient>
+          <radialGradient id="kayuAtas" cx="50%" cy="35%" r="65%">
+            <stop offset="0%" stop-color="#e0ac6e"/>
+            <stop offset="60%" stop-color="#9a6a35"/>
+            <stop offset="100%" stop-color="#5c3a1a"/>
+          </radialGradient>
+          <linearGradient id="pasirGrad" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%" stop-color="#fff3d0"/>
+            <stop offset="100%" stop-color="#dd9e28"/>
+          </linearGradient>
+          <radialGradient id="sorotCahaya" cx="35%" cy="20%" r="55%">
+            <stop offset="0%" stop-color="rgba(255,255,255,0.55)"/>
+            <stop offset="55%" stop-color="rgba(255,255,255,0.08)"/>
+            <stop offset="100%" stop-color="rgba(255,255,255,0)"/>
+          </radialGradient>
+        </defs>
+
+        <!-- TUTUP BAWAH: silinder (sisi melengkung + wajah elips di atas) -->
+        <rect x="12" y="182" width="96" height="16" fill="url(#kayuSisi)"/>
+        <ellipse cx="60" cy="198" rx="48" ry="7" fill="#241404"/>
+        <ellipse cx="60" cy="182" rx="48" ry="7" fill="url(#kayuAtas)"/>
+
+        <!-- TUTUP ATAS: silinder (sisi melengkung + wajah elips di atas) -->
+        <rect x="12" y="10" width="96" height="16" fill="url(#kayuSisi)"/>
+        <ellipse cx="60" cy="26" rx="48" ry="7" fill="#241404"/>
+        <ellipse cx="60" cy="10" rx="48" ry="7" fill="url(#kayuAtas)"/>
+
+        <!-- badan kaca outline -->
+        <path d="M20,20 L100,20 L60,100 L100,180 L20,180 L60,100 Z" fill="rgba(255,255,255,0.03)" stroke="rgba(200,230,255,0.5)" stroke-width="2"/>
+
+        <!-- pasir -->
+        <polygon id="pasirAtas" points="20,20 100,20 60,100" fill="url(#pasirGrad)"/>
+        <polygon id="pasirBawah" points="60,180 60,180 60,180" fill="url(#pasirGrad)"/>
+        <rect id="alirPasir" x="58" y="94" width="4" height="10" fill="#fff3d0" opacity="0.95">
+          <animate attributeName="y" values="92;108;92" dur="0.45s" repeatCount="indefinite"/>
+        </rect>
+
+        <!-- lapisan kaca melengkung (gradasi horizontal - kesan tabung silinder) -->
+        <path d="M20,20 L100,20 L60,100 L100,180 L20,180 L60,100 Z" fill="url(#kacaGrad)"/>
+
+        <!-- sorotan cahaya utama (kesan perspektif cahaya dari kiri-atas) -->
+        <ellipse cx="42" cy="45" rx="20" ry="30" fill="url(#sorotCahaya)"/>
+        <ellipse cx="42" cy="150" rx="20" ry="26" fill="url(#sorotCahaya)"/>
+      </svg>
+      </div>
+      <div class="jampasir-angka" id="timerLbl">${state.timerVal}</div>
+    </div>
     <div class="soal-center-col">
       <div class="soal-row">
         <span>${a}  x  ${b}  =</span>
@@ -1131,6 +1329,7 @@ function tampilSoal(){
   numpad.innerHTML = npHtml;
 
   hitungMundur();
+  mulaiAnimasiJamPasir(state.durasiTimer);
 }
 function numpadInput(v){
   if(state.sudahJawab) return;
@@ -1147,7 +1346,7 @@ function hitungMundur(){
     if(state.sudahJawab){ clearTimerHandle(); return; }
     const lbl = document.getElementById('timerLbl');
     if(!lbl){ clearTimerHandle(); return; }
-    lbl.textContent = `⏰  ${state.timerVal}`;
+    lbl.textContent = `${state.timerVal}`;
     lbl.style.color = state.timerVal <= 5 ? 'var(--aksen1)' : 'var(--teks)';
 
     if(state.timerVal <= 0){
