@@ -21,6 +21,12 @@
   font-weight: 400 900;
   font-display: swap;
 }
+@font-face{
+  font-family:'Fredoka';
+  src: url('fonts/Fredoka.ttf') format('truetype');
+  font-weight: 300 700;
+  font-display: swap;
+}
 </style>
 <link rel="apple-touch-icon" href="icons/icon-192.png">
 <meta name="apple-mobile-web-app-capable" content="yes">
@@ -77,6 +83,13 @@ html,body{margin:0; padding:0; height:100%; overflow:hidden; background:var(--bg
 .menu-wrap{justify-content:center; padding-top:6vh; position:relative; z-index:1; transition:opacity .12s linear, transform .12s linear; transform-origin:center center;}
 .menu-video-wrap{position:fixed; inset:0; z-index:400; overflow:hidden; transition:opacity .12s linear; background:var(--bg);}
 .skip-video-overlay{position:fixed; inset:0; z-index:401; cursor:pointer;}
+.firework-video-wrap{
+  position:fixed; inset:0; z-index:1500; overflow:hidden; pointer-events:none;
+}
+.firework-video-wrap video{
+  width:100%; height:100%; object-fit:cover;
+  mix-blend-mode:screen; /* bagian hitam video jadi "tembus", cuma kembang api yg tampak */
+}
 .menu-video-wrap video{width:100%; height:100%; object-fit:cover;}
 .banner-sub{color:var(--kuning); font-size:16px; font-weight:bold; letter-spacing:3px;}
 .banner-title{color:var(--aksen1); font-size:clamp(30px,7vw,56px); font-weight:900; margin:4px 0; text-align:center;}
@@ -115,8 +128,9 @@ h2.judul{color:var(--kuning); font-size:clamp(20px,4vw,28px); margin:22px 0 6px;
 .grid-tabel .btn{padding:14px 6px; font-size:15px;}
 
 /* ISI TABEL N */
-.baris-tabel{width:90%; max-width:420px; background:var(--panel); border-radius:12px; padding:14px 24px; margin-top:12px;}
-.baris-tabel div{padding:6px 0; font-size:18px; font-weight:bold; text-align:left;}
+.baris-tabel{width:90%; max-width:420px; background:var(--panel); border-radius:12px; padding:16px 26px; margin:12px auto 0;}
+.baris-tabel div{padding:7px 0; font-size:24px; font-weight:bold; text-align:left;}
+.tabel-fredoka{font-family:'Fredoka', sans-serif;}
 
 /* MENU TES */
 .timer-row{display:flex; align-items:center; gap:8px; margin:10px 0;}
@@ -140,7 +154,7 @@ h2.judul{color:var(--kuning); font-size:clamp(20px,4vw,28px); margin:22px 0 6px;
 .soal-header{color:var(--teks); font-weight:bold; font-size:14px; margin-bottom:4px; text-align:center;}
 .jampasir-wrap{display:flex; flex-direction:column; align-items:center; margin-bottom:14px; perspective:400px;}
 .jampasir-3d{transform-style:preserve-3d; animation:goyangJamPasir 4s ease-in-out infinite;}
-.jampasir-svg{width:40px; height:auto; display:block;}
+.jampasir-svg{width:28px; height:auto; display:block;}
 .jampasir-angka{font-weight:bold; font-size:16px; color:var(--teks); margin-top:3px; text-align:center;}
 @keyframes goyangJamPasir{
   0%{ transform: rotateY(-10deg) rotateX(4deg); }
@@ -148,12 +162,48 @@ h2.judul{color:var(--kuning); font-size:clamp(20px,4vw,28px); margin:22px 0 6px;
   100%{ transform: rotateY(-10deg) rotateX(4deg); }
 }
 .soal-center-col{display:flex; flex-direction:column; align-items:center; width:100%;}
-.soal-row{display:flex; align-items:center; justify-content:center; gap:10px; font-size:clamp(38px,9vw,64px); font-weight:900; color:var(--putih);}
-.soal-row input{width:2.3em; text-align:center; background:var(--panel); color:var(--kuning); border:none; border-radius:10px; font-size:inherit; font-weight:inherit; padding:2px 6px;}
+.soal-row{
+  display:flex; align-items:center; justify-content:center; gap:10px;
+  font-size:clamp(46px,10vw,78px); font-weight:900; color:var(--putih);
+  background:linear-gradient(180deg, rgba(255,255,255,.06), rgba(0,0,0,.15));
+  padding:18px 30px; border-radius:20px;
+  box-shadow:
+    0 6px 0 rgba(0,0,0,.4),
+    0 10px 20px rgba(0,0,0,.4),
+    inset 0 2px 0 rgba(255,255,255,.25),
+    inset 0 -3px 6px rgba(0,0,0,.3),
+    0 0 18px rgba(77,208,255,.22);
+  border:2px solid rgba(255,255,255,.12);
+}
+.soal-row input{width:2.3em; text-align:center; background:var(--panel); color:var(--kuning); border:none; border-radius:10px; font-size:inherit; font-weight:inherit; padding:2px 6px; transition:color .25s ease, text-shadow .25s ease;}
+.soal-row input.jawaban-emas{
+  color:#ffd700;
+  text-shadow: 0 0 8px rgba(255,215,0,.85), 0 0 18px rgba(255,215,0,.5);
+  background: linear-gradient(180deg, #3a3420, var(--panel));
+}
 .info-fb{font-size:17px; font-weight:bold; height:22px; margin-top:8px; text-align:center;}
-.feedback-circle{width:64px; height:64px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:34px; color:white;}
-.fb-benar{background:#00aa00;}
-.fb-salah{background:#cc0000;}
+.feedback-circle{
+  width:64px; height:64px; border-radius:50%; display:flex; align-items:center; justify-content:center;
+  font-size:34px; color:white; position:relative; overflow:hidden;
+  animation: zoomMasukFeedback .38s cubic-bezier(.34,1.56,.64,1) both;
+  box-shadow:
+    0 6px 0 rgba(0,0,0,.4),
+    0 10px 16px rgba(0,0,0,.45),
+    inset 0 3px 4px rgba(255,255,255,.5),
+    inset 0 -6px 10px rgba(0,0,0,.35);
+}
+.feedback-circle::after{
+  content:''; position:absolute; top:6%; left:14%; width:55%; height:38%; border-radius:50%;
+  background:linear-gradient(135deg, rgba(255,255,255,.75), rgba(255,255,255,0) 70%);
+  transform:rotate(-20deg); pointer-events:none;
+}
+@keyframes zoomMasukFeedback{
+  0%{ transform:scale(0); opacity:0; }
+  60%{ transform:scale(1.15); opacity:1; }
+  100%{ transform:scale(1); opacity:1; }
+}
+.fb-benar{background:radial-gradient(circle at 35% 30%, #3fdc5a, #00aa00 65%, #007a1f);}
+.fb-salah{background:radial-gradient(circle at 35% 30%, #ff5c5c, #cc0000 65%, #900000);}
 #fbCircleWrap{height:70px; display:flex; align-items:center; justify-content:center; margin-top:8px;}
 
 /* NUMPAD + TOMBOL JAWAB: default (iPad/tablet/desktop) proporsi tombol dikecilkan ~2:3 terhadap teks soal, di-center vertikal oleh .soal-frame */
@@ -188,9 +238,9 @@ h2.judul{color:var(--kuning); font-size:clamp(20px,4vw,28px); margin:22px 0 6px;
   .soal-frame{justify-content:flex-start; padding-top:4vh; padding-bottom:245px;}
   .soal-header{font-size:15px;}
   .jampasir-wrap{margin-bottom:10px;}
-  .jampasir-svg{width:36px;}
+  .jampasir-svg{width:26px;}
   .jampasir-angka{font-size:18px;}
-  .soal-row{font-size:clamp(46px,13vw,74px);}
+  .soal-row{font-size:clamp(52px,14vw,84px); padding:16px 24px; border-radius:18px;}
   .info-fb{font-size:18px; height:24px;}
   .feedback-circle{width:78px; height:78px; font-size:40px;}
   #fbCircleWrap{height:88px;}
@@ -206,9 +256,9 @@ h2.judul{color:var(--kuning); font-size:clamp(20px,4vw,28px); margin:22px 0 6px;
   .soal-frame{padding-top:2vh; padding-bottom:10px;}
   .soal-header{margin-bottom:3px; font-size:13px;}
   .jampasir-wrap{margin-bottom:5px;}
-  .jampasir-svg{width:24px;}
+  .jampasir-svg{width:18px;}
   .jampasir-angka{font-size:12px; margin-top:0;}
-  .soal-row{font-size:clamp(26px,6vw,38px); gap:6px;}
+  .soal-row{font-size:clamp(30px,7vw,44px); gap:6px; padding:8px 16px; border-radius:12px;}
   .info-fb{margin-top:5px; height:16px; font-size:12px;}
   .feedback-circle{width:50px; height:50px; font-size:26px;}
   #fbCircleWrap{height:58px; margin-top:5px;}
@@ -219,7 +269,7 @@ h2.judul{color:var(--kuning); font-size:clamp(20px,4vw,28px); margin:22px 0 6px;
   .back-btn{padding:7px 12px; font-size:11px;}
 }
 @media (orientation:landscape) and (max-height:420px){
-  .soal-row{font-size:clamp(20px,5vw,28px);}
+  .soal-row{font-size:clamp(24px,6vw,32px); padding:6px 12px; border-radius:10px;}
   .numpad{grid-template-columns:repeat(3,38px); gap:4px;}
   .numpad button{padding:5px 0; font-size:12px;}
   .jawab-btn{width:calc(38px*3 + 4px*2); font-size:11px; padding:8px 0;}
@@ -302,6 +352,11 @@ h2.judul{color:var(--kuning); font-size:clamp(20px,4vw,28px); margin:22px 0 6px;
   </video>
 </div>
 <div class="skip-video-overlay" id="skipVideoOverlay" style="display:none;"></div>
+<div class="firework-video-wrap" id="fireworkVideoWrap" style="display:none;">
+  <video id="videoFireworkHasil" playsinline preload="auto">
+    <source src="video/firework-hasil.mp4" type="video/mp4">
+  </video>
+</div>
 
 <script>
 /* ══════════════════ WARNA & DATA ══════════════════ */
@@ -758,6 +813,46 @@ function suaraItsOkSintesis(){
   nada(659.25, 0.55, 0.18, 'triangle', 0.22); // E5 - kecil, dorongan semangat penutup
   nada(783.99, 0.68, 0.24, 'triangle', 0.20); // G5 - penutup ceria
 }
+function putarVideoFireworkHasil(){
+  const wrap = document.getElementById('fireworkVideoWrap');
+  const video = document.getElementById('videoFireworkHasil');
+  if(!wrap || !video){
+    // elemen tidak ketemu -> fallback ke versi sintesis lama
+    suaraFirework(); tampilkanFirework();
+    return;
+  }
+  wrap.style.display = 'block';
+  video.currentTime = 0;
+  video.muted = false;
+
+  function bersihkan(){
+    wrap.style.display = 'none';
+    video.pause();
+  }
+  video.addEventListener('ended', bersihkan, {once:true});
+  video.addEventListener('error', ()=>{
+    bersihkan();
+    suaraFirework(); tampilkanFirework(); // video gagal dimuat -> fallback sintesis
+  }, {once:true});
+
+  const playPromise = video.play();
+  if(playPromise !== undefined){
+    playPromise.catch(()=>{
+      // suara diblokir browser -> coba lagi bisu, kompensasi pakai suara sintesis
+      video.muted = true;
+      const playCadangan = video.play();
+      if(playCadangan !== undefined){
+        playCadangan.then(()=>{ suaraFirework(); }).catch(()=>{
+          bersihkan();
+          suaraFirework(); tampilkanFirework(); // gagal total -> fallback penuh sintesis
+        });
+      } else {
+        suaraFirework();
+      }
+    });
+  }
+}
+
 function suaraFirework(){
   mainkanFile(['sounds/firework.m4a','sounds/firework.mp3'], 0.9, suaraFireworkSintesis);
 }
@@ -1176,7 +1271,7 @@ function halamanTabel(){
     <h2 class="judul">📊 TABEL PERKALIAN</h2>
     <div class="subteks">Pilih tabel yang ingin dilihat:</div>
     <div class="grid-tabel">${grid}</div>
-  `);
+  `, 'tabel-fredoka');
   backBtn(halamanMenuUtama);
 }
 
@@ -1189,9 +1284,9 @@ function halamanIsiTabel(n){
     rows += `<div style="color:${fg}">   ${n}  ×  ${i}  =  ${n*i}   </div>`;
   }
   render(`
-    <h2 class="judul">✦ Tabel Perkalian ${n} ✦</h2>
+    <h2 class="judul">Tabel Perkalian ${n}</h2>
     <div class="baris-tabel">${rows}</div>
-  `);
+  `, 'tabel-fredoka');
   backBtn(halamanTabel);
 }
 
@@ -1506,6 +1601,7 @@ function cekJawaban(){
     state.skor += 1;
     info.textContent = 'BENAR!  Hebat!'; info.style.color='#69f0ae';
     state.riwayat.push(['benar',a,b,state.jwbBenar]);
+    entry.classList.add('jawaban-emas');
     tampilFeedbackBesar(true);
     suaraBenar();
   } else {
@@ -1584,8 +1680,7 @@ function tampilHasil(){
   //  80 - 89  -> suara ucapan "It's ok!"
   if(nilai === 100){
     setTimeout(()=>{
-      suaraFirework();
-      tampilkanFirework();
+      putarVideoFireworkHasil();
     }, 300);
   } else if(nilai >= 90){
     setTimeout(()=>{ suaraHore(); }, 300);
