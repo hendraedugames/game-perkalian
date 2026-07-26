@@ -75,8 +75,8 @@ html,body{margin:0; padding:0; height:100%; overflow:hidden; background:var(--bg
 
 /* MENU UTAMA */
 .menu-wrap{justify-content:center; padding-top:6vh; position:relative; z-index:1; transition:opacity .12s linear, transform .12s linear; transform-origin:center center;}
-.menu-video-wrap{position:absolute; inset:0; z-index:0; overflow:hidden; transition:opacity .12s linear;}
-.skip-video-overlay{position:absolute; inset:0; z-index:2; cursor:pointer;}
+.menu-video-wrap{position:fixed; inset:0; z-index:400; overflow:hidden; transition:opacity .12s linear; background:var(--bg);}
+.skip-video-overlay{position:fixed; inset:0; z-index:401; cursor:pointer;}
 .menu-video-wrap video{width:100%; height:100%; object-fit:cover;}
 .banner-sub{color:var(--kuning); font-size:16px; font-weight:bold; letter-spacing:3px;}
 .banner-title{color:var(--aksen1); font-size:clamp(30px,7vw,56px); font-weight:900; margin:4px 0; text-align:center;}
@@ -296,6 +296,12 @@ h2.judul{color:var(--kuning); font-size:clamp(20px,4vw,28px); margin:22px 0 6px;
   <div class="splash-tap">&#9655; Ketuk di mana saja untuk mulai</div>
 </div>
 <div id="app"></div>
+<div class="menu-video-wrap" id="menuVideoWrap" style="display:none;">
+  <video id="videoMenuUtama" playsinline preload="auto">
+    <source src="video/intro-menu.mp4" type="video/mp4">
+  </video>
+</div>
+<div class="skip-video-overlay" id="skipVideoOverlay" style="display:none;"></div>
 
 <script>
 /* ══════════════════ WARNA & DATA ══════════════════ */
@@ -354,6 +360,31 @@ function mainkanFile(daftarPath, volume, fallbackFn, idx){
 }
 // Splash screen "HENDRA EDUGAMES": sentuhan pertama di sini yang membuka izin audio browser
 // SEKALIGUS memicu musik intro pembuka - persis di titik paling awal sebelum menu utama muncul.
+let videoIntroPromise = null; // resolve ke 'suara' | 'bisu' | 'gagal'
+
+function cobaPutarVideoIntroSaatSentuhan(){
+  // Dipanggil SYNCHRONOUS langsung di dalam event sentuhan splash (bukan setelah setTimeout)
+  // supaya browser menganggap ini respons langsung dari gesture pengguna - memaksimalkan
+  // peluang video boleh autoplay BERSUARA (bukan otomatis dibisukan/diblokir).
+  const video = document.getElementById('videoMenuUtama');
+  if(!video || videoMenuSudahDiputar){
+    videoIntroPromise = Promise.resolve('gagal');
+    return;
+  }
+  video.muted = false;
+  const playPromise = video.play();
+  if(playPromise === undefined){
+    videoIntroPromise = Promise.resolve('suara');
+    return;
+  }
+  videoIntroPromise = playPromise.then(()=> 'suara').catch(()=>{
+    video.muted = true;
+    const playCadangan = video.play();
+    if(playCadangan === undefined) return 'bisu';
+    return playCadangan.then(()=> 'bisu').catch(()=> 'gagal');
+  });
+}
+
 function mulaiDariSplash(e){
   const splash = document.getElementById('splashScreen');
   if(!splash) return;
@@ -361,11 +392,11 @@ function mulaiDariSplash(e){
   if(e){ e.preventDefault(); e.stopPropagation(); }
   // Buka izin audio browser di sini (wajib terjadi langsung saat sentuhan/gesture pengguna)
   getAudioCtx();
+  // Mulai putar video DETIK ITU JUGA (synchronous dengan sentuhan) - lihat penjelasan di atas
+  cobaPutarVideoIntroSaatSentuhan();
   splash.classList.add('splash-hide');
   setTimeout(()=>{
     splash.remove();
-    // Musik intro baru dimainkan SETELAH benar-benar sampai di layar Menu Utama (bukan saat masih di splash)
-    suaraIntroPembuka();
   }, 650);
 }
 document.addEventListener('DOMContentLoaded', ()=>{
@@ -1034,13 +1065,6 @@ function halamanMenuUtama(){
   clearTimerHandle();
   const tampilkanVideo = !videoMenuSudahDiputar;
   render(`
-    ${tampilkanVideo ? `
-    <div class="menu-video-wrap" id="menuVideoWrap">
-      <video id="videoMenuUtama" muted playsinline autoplay preload="auto">
-        <source src="video/intro-menu.mp4" type="video/mp4">
-      </video>
-    </div>
-    <div class="skip-video-overlay" id="skipVideoOverlay"></div>` : ''}
     <div class="menu-wrap" id="kontenMenuUtama" style="display:flex;flex-direction:column;align-items:center; ${tampilkanVideo ? 'opacity:0; transform:scale(0.02); pointer-events:none;' : 'opacity:1; transform:scale(1);'}">
       <div class="banner-sub">✦ SUPER ✦</div>
       <div class="banner-title">GAME PERKALIAN</div>
@@ -1074,12 +1098,14 @@ function aturVideoIntroMenu(){
   const skipOverlay = document.getElementById('skipVideoOverlay');
   if(!video || !konten || !videoWrap) return;
 
+  videoWrap.style.display = 'block';
+  if(skipOverlay) skipOverlay.style.display = 'block';
+
   let selesai = false;
   function selesaikanVideo(cepat){
     if(selesai) return;
     selesai = true;
     if(cepat){
-      // dilewati (skip) oleh pengguna -> transisi tetap halus tapi lebih cepat, bukan lompatan kasar
       konten.style.transition = 'opacity .3s linear, transform .3s linear';
       videoWrap.style.transition = 'opacity .3s linear';
     }
@@ -1087,24 +1113,24 @@ function aturVideoIntroMenu(){
     konten.style.transform = 'scale(1)';
     konten.style.pointerEvents = 'auto';
     videoWrap.style.opacity = '0';
-    if(skipOverlay) skipOverlay.remove();
+    if(skipOverlay) skipOverlay.style.display = 'none';
     try{ video.pause(); }catch(e){}
     setTimeout(()=>{ if(videoWrap) videoWrap.style.display = 'none'; }, cepat ? 320 : 0);
   }
 
-  // Tap/klik di mana saja selama video berjalan -> langsung lewati ke tampilan menu penuh
   if(skipOverlay){
     skipOverlay.addEventListener('click', ()=> selesaikanVideo(true));
     skipOverlay.addEventListener('touchstart', ()=> selesaikanVideo(true), {passive:true});
   }
 
-  video.addEventListener('error', ()=> selesaikanVideo(false));
+  video.addEventListener('error', ()=>{
+    suaraIntroPembuka();
+    selesaikanVideo(false);
+  });
   video.addEventListener('ended', ()=> selesaikanVideo(false));
   video.addEventListener('timeupdate', ()=>{
     if(selesai || !video.duration || isNaN(video.duration)) return;
     const progres = Math.min(1, video.currentTime / video.duration);
-    // Crossfade + efek membesar dari titik HANYA berlangsung di sepertiga akhir video (progres 2/3 -> 1).
-    // Sebelum itu, menu tetap tak terlihat (titik/transparan) dan video tampil penuh normal.
     const batasMulai = 2/3;
     let fraksiLokal = 0;
     if(progres >= batasMulai){
@@ -1116,11 +1142,26 @@ function aturVideoIntroMenu(){
     videoWrap.style.opacity = String(1 - fraksiLokal);
   });
 
-  const playPromise = video.play();
-  if(playPromise !== undefined){
-    playPromise.catch(()=> selesaikanVideo(false)); // autoplay diblokir / file tidak ada -> fallback langsung tampil menu
+  // Video SUDAH mulai diputar sejak splash disentuh (lihat cobaPutarVideoIntroSaatSentuhan).
+  // Di sini kita tinggal menunggu hasil akhirnya: berhasil dgn suara, jatuh ke bisu, atau gagal total.
+  if(videoIntroPromise){
+    videoIntroPromise.then((status)=>{
+      if(selesai) return;
+      if(status === 'gagal'){
+        suaraIntroPembuka();
+        selesaikanVideo(false);
+      } else if(status === 'bisu'){
+        suaraIntroPembuka(); // video jadi bisu -> musik sintesis mengisi sebagai pengganti
+      }
+      // status === 'suara' -> biarkan suara asli video yang terdengar, tidak perlu apa-apa lagi
+    });
+  } else {
+    // jarang terjadi (elemen video tidak sempat ditemukan saat splash disentuh) -> fallback aman
+    suaraIntroPembuka();
+    selesaikanVideo(false);
   }
 }
+
 
 /* ══════════════════ TABEL PERKALIAN ══════════════════ */
 function halamanTabel(){
