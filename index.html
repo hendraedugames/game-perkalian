@@ -397,6 +397,7 @@ function mulaiDariSplash(e){
   splash.classList.add('splash-hide');
   setTimeout(()=>{
     splash.remove();
+    halamanMenuUtama(); // baru render Menu Utama SEKARANG, setelah splash benar-benar disentuh & hilang
   }, 650);
 }
 document.addEventListener('DOMContentLoaded', ()=>{
@@ -1603,7 +1604,10 @@ document.addEventListener('click', (e)=>{
 }, true);
 
 /* ══════════════════ INIT ══════════════════ */
-halamanMenuUtama();
+// halamanMenuUtama() TIDAK dipanggil di sini lagi - sekarang baru dijalankan di dalam
+// mulaiDariSplash() setelah splash "HENDRA EDUGAMES" benar-benar disentuh & hilang.
+// Ini penting supaya logika video intro (play, crossfade) baru mulai persis saat
+// sentuhan asli terjadi, bukan diam-diam berjalan duluan sebelum splash disentuh.
 
 // Registrasi Service Worker (untuk mode offline & PWA di browser).
 // Dilewati otomatis kalau berjalan di dalam APK Capacitor - karena di situ semua file
