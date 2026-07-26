@@ -1,0 +1,26 @@
+Taruh file video intro Anda di folder ini dengan nama PERSIS:
+
+  intro-menu.mp4
+
+Format WAJIB .mp4 (codec H.264) - ini format yang paling universal
+didukung semua browser & WebView Android/iOS tanpa perlu konversi.
+
+Video ini akan otomatis diputar SEKALI SAJA saat pertama kali masuk
+ke Menu Utama (setelah splash "HENDRA EDUGAMES" disentuh). Selama
+video berjalan:
+  - Video akan tampil penuh dulu
+  - Tulisan "SUPER GAME PERKALIAN" perlahan MEMUDAR MASUK mengikuti
+    progres video (0% di awal video -> 100% di akhir video)
+  - Video perlahan MEMUDAR KELUAR bersamaan, sampai akhirnya hilang
+    total tepat saat video selesai, menyisakan tampilan menu penuh
+
+Tips:
+  - Video TIDAK perlu ada suara (akan diputar otomatis dalam kondisi
+    mute/bisu, karena browser tidak mengizinkan video bersuara
+    autoplay tanpa interaksi pengguna)
+  - Durasi video bebas - transisi otomatis menyesuaikan panjangnya
+  - Kalau file belum ada / gagal dimuat, menu akan langsung tampil
+    normal tanpa video (tidak akan error/blank)
+  - Video HANYA diputar sekali di awal sesi. Kalau user pindah ke
+    halaman lain lalu balik ke Menu Utama, video TIDAK diulang lagi
+    (supaya tidak mengganggu kalau bolak-balik menu)
