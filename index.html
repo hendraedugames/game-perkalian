@@ -222,6 +222,18 @@ h2.judul{color:var(--kuning); font-size:clamp(20px,4vw,28px); margin:22px 0 6px;
   text-shadow: 0 0 8px rgba(255,215,0,.85), 0 0 18px rgba(255,215,0,.5);
   background: linear-gradient(180deg, #3a3420, var(--panel));
 }
+.soal-row input.jawaban-merah{
+  color:#ff5252;
+  text-shadow: 0 0 8px rgba(255,82,82,.85), 0 0 18px rgba(255,82,82,.5);
+  background: linear-gradient(180deg, #3a2020, var(--panel));
+}
+.angka-jawaban-emas{
+  display:inline-block; font-size:1.6em; font-weight:900; color:#ffd700; margin-left:4px;
+  text-shadow:
+    1px 1px 0 #b8860b, 2px 2px 0 #9a6d08, 3px 3px 0 #7d5706,
+    3px 3px 3px rgba(0,0,0,.4), 3px 3px 12px rgba(255,215,0,.6);
+  animation: kilauEmas 1.9s ease-in-out infinite;
+}
 .info-fb{font-size:17px; font-weight:bold; height:22px; margin-top:8px; text-align:center;}
 .feedback-circle{
   width:64px; height:64px; border-radius:50%; display:flex; align-items:center; justify-content:center;
@@ -328,9 +340,10 @@ h2.judul{color:var(--kuning); font-size:clamp(20px,4vw,28px); margin:22px 0 6px;
 /* ══════════════════ HALAMAN HASIL SEMPURNA (nilai 100) ══════════════════ */
 .hasil-sempurna-konten{
   display:flex; flex-direction:column; align-items:center; width:100%;
-  padding-top:8vh; opacity:0; transition:opacity 1.3s ease;
+  padding-top:8vh; opacity:0; transform:scale(0.3);
+  transition:opacity .45s cubic-bezier(.34,1.56,.64,1), transform .45s cubic-bezier(.34,1.56,.64,1);
 }
-.hasil-sempurna-konten.tampil{ opacity:1; }
+.hasil-sempurna-konten.tampil{ opacity:1; transform:scale(1); }
 @keyframes kilauEmas{
   0%,100%{ filter:brightness(1) drop-shadow(0 0 5px rgba(255,215,0,.45)); }
   50%{ filter:brightness(1.3) drop-shadow(0 0 18px rgba(255,215,0,.85)); }
@@ -538,8 +551,9 @@ function nada(freq, waktuMulai, durasi, tipe, volume){
   const gain = ctx.createGain();
   osc.type = tipe || 'sine';
   osc.frequency.setValueAtTime(freq, ctx.currentTime + waktuMulai);
+  const volAkhir = Math.min(1, (volume||0.25) * 2); // semua volume sintesis dinaikkan 2x
   gain.gain.setValueAtTime(0, ctx.currentTime + waktuMulai);
-  gain.gain.linearRampToValueAtTime(volume||0.25, ctx.currentTime + waktuMulai + 0.01);
+  gain.gain.linearRampToValueAtTime(volAkhir, ctx.currentTime + waktuMulai + 0.01);
   gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + waktuMulai + durasi);
   osc.connect(gain).connect(ctx.destination);
   osc.start(ctx.currentTime + waktuMulai);
@@ -579,8 +593,8 @@ function suaraSalahSintesis(){
     osc.stop(ctx.currentTime + mulai + durasi + 0.02);
     osc2.stop(ctx.currentTime + mulai + durasi + 0.02);
   }
-  buzz(200, 0,    0.20, 0.32);
-  buzz(150, 0.19, 0.28, 0.32);
+  buzz(200, 0,    0.20, 1.0);
+  buzz(150, 0.19, 0.28, 1.0);
 }
 function suaraWaktuHabis(){
   mainkanFile(['sounds/waktu_habis.m4a','sounds/waktu_habis.mp3'], 0.9, suaraWaktuHabisSintesis);
@@ -593,8 +607,8 @@ function suaraWaktuHabisSintesis(){
   osc.type = 'square';
   osc.frequency.setValueAtTime(440, ctx.currentTime);
   gain.gain.setValueAtTime(0, ctx.currentTime);
-  gain.gain.linearRampToValueAtTime(0.32, ctx.currentTime + 0.02);
-  gain.gain.setValueAtTime(0.32, ctx.currentTime + 0.55);
+  gain.gain.linearRampToValueAtTime(1.0, ctx.currentTime + 0.02);
+  gain.gain.setValueAtTime(1.0, ctx.currentTime + 0.55);
   gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.7);
   osc.connect(gain).connect(ctx.destination);
   osc.start();
@@ -624,7 +638,7 @@ function padChord(freqs, mulai, durasi, filterAwal, filterAkhir, volume){
     filter.frequency.setValueAtTime(filterAwal, ctx.currentTime + mulai);
     filter.frequency.linearRampToValueAtTime(filterAkhir, ctx.currentTime + mulai + durasi);
     gain.gain.setValueAtTime(0, ctx.currentTime + mulai);
-    gain.gain.linearRampToValueAtTime(volume, ctx.currentTime + mulai + 0.18);
+    gain.gain.linearRampToValueAtTime(Math.min(1, volume*4), ctx.currentTime + mulai + 0.18);
     gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + mulai + durasi);
     osc1.connect(filter); osc2.connect(filter); filter.connect(gain).connect(ctx.destination);
     osc1.start(ctx.currentTime + mulai); osc2.start(ctx.currentTime + mulai);
@@ -644,7 +658,7 @@ function pluck(freq, mulai, durasi, volume){
   filter.frequency.setValueAtTime(5000, ctx.currentTime + mulai);
   filter.frequency.exponentialRampToValueAtTime(500, ctx.currentTime + mulai + durasi);
   gain.gain.setValueAtTime(0, ctx.currentTime + mulai);
-  gain.gain.linearRampToValueAtTime(volume, ctx.currentTime + mulai + 0.008);
+  gain.gain.linearRampToValueAtTime(Math.min(1, volume*2*2), ctx.currentTime + mulai + 0.008);
   gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + mulai + durasi);
   osc.connect(filter).connect(gain).connect(ctx.destination);
   osc.start(ctx.currentTime + mulai);
@@ -666,7 +680,7 @@ function riser(mulai, durasi){
   filter.frequency.exponentialRampToValueAtTime(6000, ctx.currentTime + mulai + durasi);
   const gain = ctx.createGain();
   gain.gain.setValueAtTime(0.001, ctx.currentTime + mulai);
-  gain.gain.exponentialRampToValueAtTime(0.22, ctx.currentTime + mulai + durasi);
+  gain.gain.exponentialRampToValueAtTime(Math.min(1, 0.44*2), ctx.currentTime + mulai + durasi);
   src.connect(filter).connect(gain).connect(ctx.destination);
   src.start(ctx.currentTime + mulai);
   src.stop(ctx.currentTime + mulai + durasi + 0.02);
@@ -677,7 +691,7 @@ function riser(mulai, durasi){
   osc.frequency.setValueAtTime(200, ctx.currentTime + mulai);
   osc.frequency.exponentialRampToValueAtTime(1400, ctx.currentTime + mulai + durasi);
   oGain.gain.setValueAtTime(0.001, ctx.currentTime + mulai);
-  oGain.gain.exponentialRampToValueAtTime(0.15, ctx.currentTime + mulai + durasi);
+  oGain.gain.exponentialRampToValueAtTime(Math.min(1, 0.30*2), ctx.currentTime + mulai + durasi);
   osc.connect(oGain).connect(ctx.destination);
   osc.start(ctx.currentTime + mulai);
   osc.stop(ctx.currentTime + mulai + durasi + 0.02);
@@ -690,7 +704,7 @@ function impactDrop(mulai){
   osc.type = 'sine';
   osc.frequency.setValueAtTime(150, ctx.currentTime + mulai);
   osc.frequency.exponentialRampToValueAtTime(45, ctx.currentTime + mulai + 0.35);
-  gain.gain.setValueAtTime(0.55, ctx.currentTime + mulai);
+  gain.gain.setValueAtTime(1.0, ctx.currentTime + mulai);
   gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + mulai + 0.5);
   osc.connect(gain).connect(ctx.destination);
   osc.start(ctx.currentTime + mulai);
@@ -755,8 +769,9 @@ function bisingPutih(durasi, volume, waktuMulai, freqFilter){
   const src = ctx.createBufferSource();
   src.buffer = buffer;
   const gain = ctx.createGain();
+  const volAkhir = Math.min(1, volume * 2); // semua volume sintesis dinaikkan 2x
   gain.gain.setValueAtTime(0, ctx.currentTime + (waktuMulai||0));
-  gain.gain.linearRampToValueAtTime(volume, ctx.currentTime + (waktuMulai||0) + 0.01);
+  gain.gain.linearRampToValueAtTime(volAkhir, ctx.currentTime + (waktuMulai||0) + 0.01);
   gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + (waktuMulai||0) + durasi);
   const filter = ctx.createBiquadFilter();
   filter.type = 'bandpass';
@@ -850,7 +865,7 @@ function suaraHoreSintesis(){
     osc.frequency.exponentialRampToValueAtTime(pitchDasar*1.7, ctx.currentTime + puncakWaktu);
     osc.frequency.exponentialRampToValueAtTime(pitchDasar*0.9, ctx.currentTime + mulai + durasi);
     gain.gain.setValueAtTime(0, ctx.currentTime + mulai);
-    gain.gain.linearRampToValueAtTime(0.24 + Math.random()*0.12, ctx.currentTime + mulai + 0.08);
+    gain.gain.linearRampToValueAtTime(Math.min(1, (0.24 + Math.random()*0.12) * 4), ctx.currentTime + mulai + 0.08);
     gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + mulai + durasi);
 
     if(ctx.createStereoPanner){
@@ -941,7 +956,7 @@ function suaraFireworkSintesis(){
     whoosh.type = 'sine';
     whoosh.frequency.setValueAtTime(300, ctx.currentTime + delay);
     whoosh.frequency.exponentialRampToValueAtTime(1200, ctx.currentTime + delay + 0.18);
-    whooshGain.gain.setValueAtTime(0.05, ctx.currentTime + delay);
+    whooshGain.gain.setValueAtTime(Math.min(1, 0.10*2), ctx.currentTime + delay);
     whooshGain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + delay + 0.2);
     whoosh.connect(whooshGain).connect(ctx.destination);
     whoosh.start(ctx.currentTime + delay);
@@ -955,7 +970,7 @@ function suaraFireworkSintesis(){
     osc.type = 'sawtooth';
     osc.frequency.setValueAtTime(besar ? 1200 : 900, ctx.currentTime + tLedak);
     osc.frequency.exponentialRampToValueAtTime(70, ctx.currentTime + tLedak + (besar?0.55:0.4));
-    gain.gain.setValueAtTime(besar ? 0.16 : 0.12, ctx.currentTime + tLedak);
+    gain.gain.setValueAtTime(Math.min(1, (besar ? 0.32 : 0.24)*2), ctx.currentTime + tLedak);
     gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + tLedak + (besar?0.6:0.45));
     osc.connect(gain).connect(ctx.destination);
     osc.start(ctx.currentTime + tLedak);
@@ -1659,7 +1674,7 @@ function hitungMundur(){
       state.sudahJawab = true;
       nonaktifkanInput();
       const info = document.getElementById('infoFb');
-      if(info){ info.textContent = `⏰ Waktu habis!  Jawaban: ${state.jwbBenar}`; info.style.color='var(--kuning)'; }
+      if(info){ info.innerHTML = `⏰ Waktu habis!  Jawaban: <span class="angka-jawaban-emas">${state.jwbBenar}</span>`; info.style.color='var(--kuning)'; }
       const [a,b] = state.soalSkrg;
       state.riwayat.push(['habis',a,b,state.jwbBenar]);
       tambahUlangan(a,b);
@@ -1700,9 +1715,10 @@ function cekJawaban(){
     tampilFeedbackBesar(true);
     suaraBenar();
   } else {
-    info.textContent = `SALAH!  Jawaban: ${state.jwbBenar}`; info.style.color='var(--aksen1)';
+    info.innerHTML = `SALAH!  Jawaban: <span class="angka-jawaban-emas">${state.jwbBenar}</span>`; info.style.color='var(--aksen1)';
     state.riwayat.push(['salah',a,b,state.jwbBenar]);
     tambahUlangan(a,b);
+    entry.classList.add('jawaban-merah');
     tampilFeedbackBesar(false);
     suaraSalah();
   }
@@ -1808,11 +1824,11 @@ function tampilHasilSempurna(riwayatHtml){
   // Video kembang api tampil DULUAN sendirian (konten teks masih tak terlihat)
   putarVideoFireworkHasil();
 
-  // Setelah 3 detik, halaman nilai baru memudar masuk menyusul di atas video yang masih berjalan
+  // Setelah 0.6 detik, halaman nilai memudar+zoom masuk cepat (menutupi jeda freeze awal video)
   setTimeout(()=>{
     const konten = document.getElementById('hasilSempurnaKonten');
     if(konten) konten.classList.add('tampil');
-  }, 3000);
+  }, 600);
 }
 function mulaiUlang(){
   mulai(state.mode);
