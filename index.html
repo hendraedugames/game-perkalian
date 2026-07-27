@@ -61,6 +61,28 @@ html,body{margin:0; padding:0; height:100%; overflow:hidden; background:var(--bg
     inset 0 1px 0 rgba(255,255,255,.18),
     0 0 6px rgba(77,208,255,.18);
 }
+.tabel-terpilih{
+  background: linear-gradient(135deg, #f8f8f8 0%, #cfcfcf 22%, #f0f0f0 42%, #9a9a9a 58%, #e2e2e2 78%, #b5b5b5 100%);
+  color:#1a1a2e !important;
+  position:relative; overflow:hidden;
+  box-shadow:
+    0 5px 0 rgba(0,0,0,.5),
+    0 9px 14px rgba(0,0,0,.45),
+    inset 0 2px 0 rgba(255,255,255,.85),
+    inset 0 -4px 6px rgba(0,0,0,.35);
+}
+.tabel-terpilih::after{
+  content:''; position:absolute; top:-60%; left:-30%; width:45%; height:220%;
+  background:linear-gradient(120deg, transparent, rgba(255,255,255,.95), transparent);
+  transform:rotate(20deg);
+  animation: kilauMetalik 2.6s ease-in-out infinite;
+  pointer-events:none;
+}
+@keyframes kilauMetalik{
+  0%{ left:-40%; }
+  45%{ left:130%; }
+  100%{ left:130%; }
+}
 .back-btn{
   position:fixed; left:16px; bottom:14px; background:var(--panel); color:var(--abu); border:none; border-radius:8px;
   padding:10px 16px; font-weight:bold; font-size:13px; cursor:pointer; z-index:50;
@@ -93,8 +115,25 @@ html,body{margin:0; padding:0; height:100%; overflow:hidden; background:var(--bg
   mix-blend-mode:screen; /* bagian hitam video jadi "tembus", cuma kembang api yg tampak */
 }
 .menu-video-wrap video{width:100%; height:100%; object-fit:cover;}
-.banner-sub{color:var(--kuning); font-size:16px; font-weight:bold; letter-spacing:3px;}
-.banner-title{color:var(--aksen1); font-size:clamp(30px,7vw,56px); font-weight:900; margin:4px 0; text-align:center;}
+.banner-sub{
+  color:var(--kuning); font-size:16px; font-weight:bold; letter-spacing:3px;
+  text-shadow:
+    1px 1px 0 #b87a1a,
+    2px 2px 0 #a06b15,
+    3px 3px 0 #885c11,
+    3px 3px 7px rgba(0,0,0,.45);
+}
+.banner-title{
+  color:var(--aksen1); font-size:clamp(30px,7vw,56px); font-weight:900; margin:4px 0; text-align:center;
+  text-shadow:
+    1px 1px 0 #a02c40,
+    2px 2px 0 #8f2638,
+    3px 3px 0 #7d2130,
+    4px 4px 0 #6c1b28,
+    5px 5px 3px rgba(0,0,0,.35),
+    5px 5px 14px rgba(0,0,0,.5),
+    -1px -1px 0 rgba(255,255,255,.22);
+}
 .banner-tag{color:var(--teks); font-style:italic; font-size:14px; margin-bottom:24px;}
 .kotak-row{display:flex; gap:24px; flex-wrap:wrap; justify-content:center; margin-top:10px;}
 .kotak{
@@ -285,6 +324,34 @@ h2.judul{color:var(--kuning); font-size:clamp(20px,4vw,28px); margin:22px 0 6px;
 .riwayat-box{width:92%; max-width:600px; max-height:160px; overflow-y:auto; background:var(--panel); border-radius:10px; margin-top:8px; padding:6px 12px;}
 .riwayat-box div{font-size:12px; padding:2px 0;}
 .hasil-btn-row{display:flex; gap:14px; margin-top:20px; flex-wrap:wrap; justify-content:center;}
+
+/* ══════════════════ HALAMAN HASIL SEMPURNA (nilai 100) ══════════════════ */
+.hasil-sempurna-konten{
+  display:flex; flex-direction:column; align-items:center; width:100%;
+  padding-top:8vh; opacity:0; transition:opacity 1.3s ease;
+}
+.hasil-sempurna-konten.tampil{ opacity:1; }
+@keyframes kilauEmas{
+  0%,100%{ filter:brightness(1) drop-shadow(0 0 5px rgba(255,215,0,.45)); }
+  50%{ filter:brightness(1.3) drop-shadow(0 0 18px rgba(255,215,0,.85)); }
+}
+.nilai-sempurna-besar{
+  font-size:clamp(90px,22vw,170px); font-weight:900; text-align:center; line-height:1;
+  color:#ffd700;
+  text-shadow:
+    2px 2px 0 #b8860b, 4px 4px 0 #9a6d08, 6px 6px 0 #7d5706,
+    8px 8px 4px rgba(0,0,0,.4), 8px 8px 24px rgba(255,215,0,.55),
+    -2px -2px 0 rgba(255,255,255,.5);
+  animation: kilauEmas 1.9s ease-in-out infinite;
+}
+.kata-sempurna{
+  font-size:clamp(26px,7vw,46px); font-weight:900; letter-spacing:7px; text-align:center;
+  text-transform:uppercase; color:#ffd700; margin:2px 0 22px;
+  text-shadow:
+    1px 1px 0 #b8860b, 2px 2px 0 #9a6d08, 3px 3px 0 #7d5706,
+    4px 4px 3px rgba(0,0,0,.4), 4px 4px 16px rgba(255,215,0,.55);
+  animation: kilauEmas 1.9s ease-in-out infinite .15s;
+}
 .hasil-btn-row .btn{padding:12px 20px; font-size:14px; width:150px;}
 
 /* ══════════════════ SPLASH SCREEN PEMBUKA ══════════════════ */
@@ -831,6 +898,7 @@ function putarVideoFireworkHasil(){
 
   function bersihkan(){
     wrap.classList.remove('tampil');
+    app.style.background = ''; // kembalikan latar normal setelah video selesai
     video.pause();
   }
   video.addEventListener('ended', bersihkan, {once:true});
@@ -997,6 +1065,7 @@ let state = {
 
 const app = document.getElementById('app');
 function render(html, extraClass){
+  app.style.background = ''; // reset - mencegah transparansi dari layar sebelumnya (misal hasil nilai 100) terbawa
   app.innerHTML = `<div class="frame ${extraClass||''}">${html}</div>`;
 }
 /* ══════════════════ SINKRONISASI TOMBOL KEMBALI (game & tombol back HP) ══════════════════ */
@@ -1096,10 +1165,32 @@ function cobaKeluarApp(){
     return;
   }
   // Di browser/PWA biasa: browser modern umumnya memblokir script menutup tab yang bukan
-  // dibuka oleh script itu sendiri, jadi window.close() sering tidak berefek di sini - ini
-  // batasan bawaan browser, bukan bug. Kalau gagal, halaman cukup dibiarkan (tidak memasang
-  // ulang penjaga riwayat, jadi tombol back berikutnya akan benar-benar keluar secara native).
+  // dibuka oleh script itu sendiri, jadi window.close() sering tidak berefek - ini batasan
+  // bawaan browser, bukan bug. Supaya tidak terkesan "tidak terjadi apa-apa" (diam begitu saja),
+  // kita cek: kalau setelah sepersekian detik halaman masih jalan (berarti close() gagal),
+  // tampilkan pesan yang jelas ke pengguna supaya tahu harus menutup manual.
   window.close();
+  setTimeout(()=>{
+    tampilkanPesanTutupManual();
+  }, 300);
+}
+
+function tampilkanPesanTutupManual(){
+  if(document.getElementById('pesanTutupManual')) return;
+  const el = document.createElement('div');
+  el.id = 'pesanTutupManual';
+  el.className = 'modal-keluar-overlay';
+  el.innerHTML = `
+    <div class="modal-keluar-box">
+      <div class="modal-keluar-judul">👋 Sampai Jumpa!</div>
+      <div class="modal-keluar-teks">Browser tidak mengizinkan game menutup tab/aplikasi secara otomatis. Silakan tutup tab atau aplikasi ini secara manual untuk keluar.</div>
+      <div class="modal-keluar-tombol">
+        <button class="btn" id="btnMengertiTutup" style="background:var(--aksen2);">Mengerti</button>
+      </div>
+    </div>
+  `;
+  document.body.appendChild(el);
+  document.getElementById('btnMengertiTutup').onclick = ()=>{ el.remove(); };
 }
 
 function backBtn(fn, label, extraClass){
@@ -1329,7 +1420,7 @@ function halamanPilihanCampur(){
   let tblBtns = '';
   for(let i=1;i<=10;i++){
     const sel = state.pilihanSelected.has(i);
-    tblBtns += `<button class="btn" id="pilTbl${i}" style="background:${sel?'var(--hijau)':WARNA_KOTAK[i-1]}" onclick="toggleTabelPilihan(${i})">${sel?'✓ ':''}Perkalian ${i}</button>`;
+    tblBtns += `<button class="btn ${sel?'tabel-terpilih':''}" id="pilTbl${i}" style="${sel?'':'background:'+WARNA_KOTAK[i-1]+';'}" onclick="toggleTabelPilihan(${i})">${sel?'✓ ':''}Perkalian ${i}</button>`;
   }
   let jmlBtns = '';
   [10,15,20,30].forEach(n=>{
@@ -1656,6 +1747,13 @@ function tampilHasil(){
     riwayatHtml += `<div style="color:${fg}">  ${String(idx+1).padStart(2,' ')}. ${a} x ${b} = ${jwb}  ${ikon}</div>`;
   });
 
+  // Nilai SEMPURNA (100) mendapat halaman perayaan khusus - video kembang api dulu,
+  // baru halaman nilai muncul perlahan menyusul. Lihat fungsi tampilHasilSempurna().
+  if(nilai === 100){
+    tampilHasilSempurna(riwayatHtml);
+    return;
+  }
+
   render(`
     <h2 class="judul" style="color:var(--putih)">${emoji}  ${pesan}</h2>
     <div class="hasil-top">
@@ -1677,20 +1775,44 @@ function tampilHasil(){
   document.getElementById('btnLagi').onclick = ()=>mulaiUlang();
   document.getElementById('btnMenu').onclick = kembaliKeMenuUtama;
 
-  // Jika nilai di atas 90: rayakan dengan suara tepuk tangan + kembang api & animasi firework
-  // Perayaan bertingkat sesuai nilai akhir:
-  //  100      -> kembang api (suara + animasi)
-  //  90 - 99  -> tepuk tangan panjang (~4 detik, fade bertahap)
+  // Perayaan bertingkat sesuai nilai akhir (nilai 100 ditangani terpisah di tampilHasilSempurna):
+  //  90 - 99  -> suara "horeee"
   //  80 - 89  -> suara ucapan "It's ok!"
-  if(nilai === 100){
-    setTimeout(()=>{
-      putarVideoFireworkHasil();
-    }, 300);
-  } else if(nilai >= 90){
+  if(nilai >= 90){
     setTimeout(()=>{ suaraHore(); }, 300);
   } else if(nilai >= 80){
     setTimeout(()=>{ suaraItsOk(); }, 300);
   }
+}
+function tampilHasilSempurna(riwayatHtml){
+  render(`
+    <div class="hasil-sempurna-konten" id="hasilSempurnaKonten">
+      <div class="nilai-sempurna-besar">100</div>
+      <div class="kata-sempurna">SEMPURNA</div>
+      <div class="label-sub">── RIWAYAT JAWABAN ──</div>
+      <div class="riwayat-box">${riwayatHtml}</div>
+      <div class="hasil-btn-row">
+        <button class="btn" style="background:var(--aksen2)" id="btnLagi">🔄 Main Lagi</button>
+        <button class="btn" style="background:#555" id="btnMenu">🏠 Menu Utama</button>
+      </div>
+    </div>
+  `);
+  // Latar #app dibuat transparan sementara supaya video kembang api di baliknya terlihat -
+  // dikembalikan normal otomatis saat video selesai (lihat putarVideoFireworkHasil) atau saat
+  // pengguna pindah layar (render() lain akan me-reset ini otomatis).
+  app.style.background = 'transparent';
+
+  document.getElementById('btnLagi').onclick = ()=>{ app.style.background=''; mulaiUlang(); };
+  document.getElementById('btnMenu').onclick = ()=>{ app.style.background=''; kembaliKeMenuUtama(); };
+
+  // Video kembang api tampil DULUAN sendirian (konten teks masih tak terlihat)
+  putarVideoFireworkHasil();
+
+  // Setelah 3 detik, halaman nilai baru memudar masuk menyusul di atas video yang masih berjalan
+  setTimeout(()=>{
+    const konten = document.getElementById('hasilSempurnaKonten');
+    if(konten) konten.classList.add('tampil');
+  }, 3000);
 }
 function mulaiUlang(){
   mulai(state.mode);
