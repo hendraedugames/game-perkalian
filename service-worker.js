@@ -1,4 +1,4 @@
-const CACHE_NAME = 'super-perkalian-v8';
+const CACHE_NAME = 'super-perkalian-v1';
 const FILES_TO_CACHE = [
   './index.html',
   './manifest.json',
