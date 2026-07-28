@@ -27,6 +27,12 @@
   font-weight: 300 700;
   font-display: swap;
 }
+@font-face{
+  font-family:'ElitePengganti';
+  src: url('fonts/Poppins-Bold.ttf') format('truetype');
+  font-weight: 700;
+  font-display: swap;
+}
 </style>
 <link rel="apple-touch-icon" href="icons/icon-192.png">
 <meta name="apple-mobile-web-app-capable" content="yes">
@@ -115,26 +121,35 @@ html,body{margin:0; padding:0; height:100%; overflow:hidden; background:var(--bg
   mix-blend-mode:screen; /* bagian hitam video jadi "tembus", cuma kembang api yg tampak */
 }
 .menu-video-wrap video{width:100%; height:100%; object-fit:cover;}
-.banner-sub{
-  color:var(--kuning); font-size:16px; font-weight:bold; letter-spacing:3px;
-  text-shadow:
-    1px 1px 0 #b87a1a,
-    2px 2px 0 #a06b15,
-    3px 3px 0 #885c11,
-    3px 3px 7px rgba(0,0,0,.45);
+.banner-title-box{
+  border:3px solid #ffd700;
+  border-radius:18px;
+  padding:16px 28px;
+  margin:8px 0 4px;
+  background:linear-gradient(180deg, rgba(255,215,0,.08), rgba(0,0,0,.15));
+  box-shadow:
+    0 6px 0 rgba(0,0,0,.45),
+    0 10px 22px rgba(0,0,0,.45),
+    inset 0 2px 0 rgba(255,255,255,.25),
+    inset 0 -4px 8px rgba(0,0,0,.3),
+    0 0 22px rgba(255,215,0,.5),
+    0 0 4px rgba(255,215,0,.8);
+  animation: kilauEmas 2.1s ease-in-out infinite;
 }
 .banner-title{
-  color:var(--aksen1); font-size:clamp(30px,7vw,56px); font-weight:900; margin:4px 0; text-align:center;
+  font-family:'ElitePengganti', sans-serif;
+  color:#ffd700; font-size:clamp(38px,9.5vw,72px); font-weight:900; text-align:center;
+  letter-spacing:1px; line-height:1.05;
   text-shadow:
-    1px 1px 0 #a02c40,
-    2px 2px 0 #8f2638,
-    3px 3px 0 #7d2130,
-    4px 4px 0 #6c1b28,
-    5px 5px 3px rgba(0,0,0,.35),
-    5px 5px 14px rgba(0,0,0,.5),
-    -1px -1px 0 rgba(255,255,255,.22);
+    1px 1px 0 #b8860b,
+    2px 2px 0 #9a6d08,
+    3px 3px 0 #7d5706,
+    4px 4px 0 #5f4304,
+    5px 5px 3px rgba(0,0,0,.4),
+    5px 5px 18px rgba(255,215,0,.6),
+    -1px -1px 0 rgba(255,255,255,.4);
 }
-.banner-tag{color:var(--teks); font-style:italic; font-size:14px; margin-bottom:24px;}
+.banner-tag{color:var(--teks); font-style:italic; font-size:14px; margin-bottom:24px; margin-top:6px;}
 .kotak-row{display:flex; gap:24px; flex-wrap:wrap; justify-content:center; margin-top:10px;}
 .kotak{
   width:220px; height:140px; border-radius:16px; display:flex; flex-direction:column; align-items:center;
@@ -405,6 +420,51 @@ h2.judul{color:var(--kuning); font-size:clamp(20px,4vw,28px); margin:22px 0 6px;
   animation:splashBlink 1.5s ease-in-out infinite; z-index:2;
 }
 @keyframes splashBlink{ 0%,100%{opacity:.35;} 50%{opacity:1;} }
+
+/* ══════════════════ LAYAR "ARE YOU READY?" ══════════════════ */
+.ready-frame{
+  justify-content:center; align-items:center; cursor:pointer;
+  background:radial-gradient(circle at 50% 38%, #1f2a52 0%, #0c0f24 55%, #05060f 100%);
+}
+.ready-wrap{ display:flex; flex-direction:column; align-items:center; text-align:center; padding:0 24px; }
+.ready-title{
+  font-family:'Geostar','Orbitron',sans-serif;
+  font-size:clamp(30px,9vw,58px);
+  color:#4dd0ff;
+  text-shadow:0 0 10px rgba(77,208,255,.85), 0 0 26px rgba(77,208,255,.5), 0 0 46px rgba(77,208,255,.3);
+  letter-spacing:3px; line-height:1.3;
+  animation: denyutReady 1.4s ease-in-out infinite;
+}
+@keyframes denyutReady{ 0%,100%{ transform:scale(1); } 50%{ transform:scale(1.05); } }
+.ready-tap{
+  color:#8a93b8; font-size:13px; margin-top:44px; letter-spacing:1px;
+  animation:splashBlink 1.5s ease-in-out infinite;
+}
+
+/* ══════════════════ OVERLAY COUNTDOWN "3 2 1 GO" (menimpa di atas game) ══════════════════ */
+.countdown-overlay{
+  position:fixed; inset:0; z-index:800; display:flex; align-items:center; justify-content:center;
+  background:rgba(0,0,0,.35); pointer-events:none;
+}
+.countdown-angka{
+  font-size:clamp(150px,42vw,320px); font-weight:900; line-height:1; text-align:center;
+  font-family:'Fredoka', sans-serif;
+  transform-origin:center center;
+  transform:scaleY(1.25); /* sedikit memanjang vertikal */
+  color:rgba(255,215,0,.20); /* isi tengah semi-transparan, kuning keemasan */
+  -webkit-text-stroke:4px #ffd700; /* garis luar mengikuti bentuk angka, kuning keemasan */
+  text-stroke:4px #ffd700;
+  text-shadow:
+    0 0 18px rgba(255,215,0,.9),
+    0 0 45px rgba(255,215,0,.65),
+    0 0 80px rgba(255,215,0,.4);
+  animation: zoomCountdown .7s ease-in-out;
+}
+@keyframes zoomCountdown{
+  0%{ transform:scaleY(1.25) scale(.35); opacity:0; }
+  55%{ transform:scaleY(1.25) scale(1.22); opacity:1; }
+  100%{ transform:scaleY(1.25) scale(1); opacity:1; }
+}
 
 /* ══════════════════ MODAL KONFIRMASI KELUAR ══════════════════ */
 .modal-keluar-overlay{
@@ -1061,6 +1121,7 @@ const WARNA_KOTAK = ["#e94560","#f5a623","#4CAF50","#0f3460","#9c27b0","#00bcd4"
 
 let state = {
   durasiTimer: 15,
+  modeUrutan: 'acak',
   jamPasirRAF: null,
   mode: null,
   skor: 0,
@@ -1272,8 +1333,9 @@ function halamanMenuUtama(){
   const tampilkanVideo = !videoMenuSudahDiputar;
   render(`
     <div class="menu-wrap" id="kontenMenuUtama" style="display:flex;flex-direction:column;align-items:center; ${tampilkanVideo ? 'opacity:0; transform:scale(0.02); pointer-events:none;' : 'opacity:1; transform:scale(1);'}">
-      <div class="banner-sub">✦ SUPER ✦</div>
-      <div class="banner-title">GAME PERKALIAN</div>
+      <div class="banner-title-box">
+        <div class="banner-title">GAME PERKALIAN</div>
+      </div>
       <div class="banner-tag">— Asah Otak, Raih Nilai Sempurna! —</div>
       <div class="kotak-row">
         <div class="kotak" id="kTabel" style="background:var(--aksen2)">
@@ -1288,7 +1350,7 @@ function halamanMenuUtama(){
     <div class="credit">Created by Hendra</div>
   `, 'menu-wrap');
   document.getElementById('kTabel').onclick = halamanTabel;
-  document.getElementById('kTes').onclick = halamanMenuTes;
+  document.getElementById('kTes').onclick = halamanPilihJenisTes;
   document.getElementById('btnKeluarMenu').onclick = konfirmasiKeluar;
 
   if(tampilkanVideo){
@@ -1400,16 +1462,41 @@ function halamanIsiTabel(n){
   backBtn(halamanTabel);
 }
 
-/* ══════════════════ MENU TES ══════════════════ */
-function halamanMenuTes(){
+/* ══════════════════ PILIH JENIS TES (Acak / Berurut) ══════════════════ */
+function halamanPilihJenisTes(){
   clearTimerHandle();
   catatKembali(halamanMenuUtama);
+  render(`
+    <h2 class="judul aksen-judul">🎮 TES PERKALIAN</h2>
+    <div class="subteks">Pilih jenis latihan:</div>
+    <div class="kotak-row">
+      <div class="kotak" id="kBerurut" style="background:var(--aksen2)">
+        <div class="emoji">📶</div><div class="lbl">PERKALIAN\nBERURUT</div>
+      </div>
+      <div class="kotak" id="kAcak" style="background:var(--aksen1)">
+        <div class="emoji">🔀</div><div class="lbl">PERKALIAN\nACAK</div>
+      </div>
+    </div>
+  `);
+  backBtn(halamanMenuUtama);
+  document.getElementById('kAcak').onclick = ()=>halamanMenuTes('acak');
+  document.getElementById('kBerurut').onclick = ()=>halamanMenuTes('berurut');
+}
+
+/* ══════════════════ MENU TES ══════════════════ */
+function halamanMenuTes(urutan){
+  urutan = urutan || 'acak';
+  state.modeUrutan = urutan;
+  clearTimerHandle();
+  catatKembali(halamanPilihJenisTes);
+  const labelJenis = urutan==='berurut' ? '📶 MODE BERURUT' : '🔀 MODE ACAK';
   let tblBtns = '';
   for(let i=1;i<=10;i++){
-    tblBtns += `<button class="btn" style="background:${WARNA_KOTAK[i-1]}" onclick="mulai(['tabel',${i}])">Perkalian ${i}</button>`;
+    tblBtns += `<button class="btn" style="background:${WARNA_KOTAK[i-1]}" onclick="tampilkanAreYouReady(['tabel',${i}])">Perkalian ${i}</button>`;
   }
   render(`
     <h2 class="judul aksen-judul">🎮 TES PERKALIAN</h2>
+    <div class="subteks" style="color:var(--kuning); font-weight:bold;">${labelJenis}</div>
     <div class="timer-row">
       <span style="color:var(--teks);font-weight:bold;font-size:13px;">⏱ Waktu per soal:</span>
       <input type="number" id="inpTimer" min="1" max="15" value="${state.durasiTimer}">
@@ -1417,21 +1504,32 @@ function halamanMenuTes(){
     </div>
     <div class="label-sub">── PILIH TABEL ──</div>
     <div class="grid-pilih-tabel">${tblBtns}</div>
+    ${urutan === 'berurut' ? '' : `
     <div class="label-sub">── MODE CAMPUR ──</div>
     <div class="col-campur">
-      <button class="btn" style="background:var(--aksen2)" onclick="mulai(['campur',1,5])">🔀 Campur 1 – 5</button>
-      <button class="btn" style="background:var(--aksen2)" onclick="mulai(['campur',6,10])">🔀 Campur 6 – 10</button>
-      <button class="btn" style="background:var(--aksen2)" onclick="mulai(['campur',1,10])">🔀 Campur 1 – 10</button>
+      <button class="btn" style="background:var(--aksen2)" onclick="tampilkanAreYouReady(['campur',1,5])">🔀 Campur 1 – 5</button>
+      <button class="btn" style="background:var(--aksen2)" onclick="tampilkanAreYouReady(['campur',6,10])">🔀 Campur 6 – 10</button>
+      <button class="btn" style="background:var(--aksen2)" onclick="tampilkanAreYouReady(['campur',1,10])">🔀 Campur 1 – 10</button>
       <button class="btn" style="background:var(--kuning); color:var(--bg)" onclick="halamanPilihanCampur()">🎯 Perkalian Pilihan</button>
-    </div>
+    </div>`}
   `);
-  backBtn(halamanMenuUtama);
+  backBtn(halamanPilihJenisTes);
+  // Simpan durasi timer LANGSUNG saat diketik (bukan menunggu tombol mulai diklik) - supaya
+  // tetap tersimpan walau pengguna pindah ke halaman lain dulu (misal "Perkalian Pilihan")
+  // sebelum benar-benar memulai game.
+  const inputTimer = document.getElementById('inpTimer');
+  if(inputTimer){
+    inputTimer.addEventListener('input', function(){
+      const v = parseInt(this.value);
+      if(v>=1 && v<=15) state.durasiTimer = v;
+    });
+  }
 }
 
 /* ══════════════════ PERKALIAN PILIHAN ══════════════════ */
 function halamanPilihanCampur(){
   clearTimerHandle();
-  catatKembali(halamanMenuTes);
+  catatKembali(()=>halamanMenuTes(state.modeUrutan));
   let tblBtns = '';
   for(let i=1;i<=10;i++){
     const sel = state.pilihanSelected.has(i);
@@ -1450,7 +1548,7 @@ function halamanPilihanCampur(){
     <div class="peringatan" id="peringatan"></div>
     <button class="btn mulai-btn" onclick="mulaiPilihanCampur()">▶ MULAI</button>
   `);
-  backBtn(halamanMenuTes);
+  backBtn(()=>halamanMenuTes(state.modeUrutan));
 }
 function toggleTabelPilihan(n){
   if(state.pilihanSelected.has(n)) state.pilihanSelected.delete(n);
@@ -1467,7 +1565,7 @@ function mulaiPilihanCampur(){
     return;
   }
   const tabelList = Array.from(state.pilihanSelected).sort((a,b)=>a-b);
-  mulai(['campur_pilihan', tabelList, state.pilihanJumlah]);
+  tampilkanAreYouReady(['campur_pilihan', tabelList, state.pilihanJumlah]);
 }
 
 /* ══════════════════ SESI TES ══════════════════ */
@@ -1479,34 +1577,108 @@ function shuffle(arr){
   return arr;
 }
 function buatDaftar(mode){
+  const berurut = state.modeUrutan === 'berurut';
   if(mode[0]==='tabel'){
     const n = mode[1];
-    const angka = shuffle([1,2,3,4,5,6,7,8,9,10]);
+    const angka = berurut ? [1,2,3,4,5,6,7,8,9,10] : shuffle([1,2,3,4,5,6,7,8,9,10]);
     return angka.map(b=>[n,b]);
   } else if(mode[0]==='campur_pilihan'){
     const [_, tabelList, jumlah] = mode;
     let pool = [];
     tabelList.forEach(a=>{ for(let b=1;b<=10;b++) pool.push([a,b]); });
-    pool = shuffle(pool);
+    if(!berurut) pool = shuffle(pool);
     if(jumlah <= pool.length) return pool.slice(0,jumlah);
     let hasil = [];
     while(hasil.length < jumlah){
-      hasil = hasil.concat(shuffle(pool.slice()));
+      hasil = hasil.concat(berurut ? pool.slice() : shuffle(pool.slice()));
     }
     return hasil.slice(0,jumlah);
   } else {
     const [_, lo, hi] = mode;
     let pool = [];
     for(let a=lo;a<=hi;a++) for(let b=1;b<=10;b++) pool.push([a,b]);
+    if(berurut) return pool; // mode berurut: mainkan SEMUA soal berurutan, tidak dibatasi 20
     pool = shuffle(pool);
     return pool.slice(0,20);
   }
 }
-function mulai(mode){
-  catatKembali(halamanMenuTes);
-  const nilai = parseInt(document.getElementById('inpTimer')?.value || state.durasiTimer);
-  const durasi = (nilai>=1 && nilai<=15) ? nilai : state.durasiTimer;
-  state.durasiTimer = durasi;
+function tampilkanAreYouReady(mode){
+  clearTimerHandle();
+  catatKembali(()=>halamanMenuTes(state.modeUrutan));
+  render(`
+    <div class="ready-wrap">
+      <div class="ready-title">ARE YOU<br>READY?</div>
+      <div class="ready-tap">&#9655; Ketuk di mana saja untuk mulai</div>
+    </div>
+  `, 'ready-frame');
+  backBtn(()=>halamanMenuTes(state.modeUrutan));
+
+  const layar = document.querySelector('.frame.ready-frame');
+  function mulaiSekarang(e){
+    if(e){ e.preventDefault(); e.stopPropagation(); }
+    layar.removeEventListener('click', mulaiSekarang);
+    layar.removeEventListener('touchstart', mulaiSekarang);
+    tampilkanCountdownMulai(mode);
+  }
+  if(layar){
+    layar.addEventListener('click', mulaiSekarang);
+    layar.addEventListener('touchstart', mulaiSekarang, {passive:false});
+  }
+}
+
+function tampilkanCountdownMulai(mode){
+  // Render tampilan game SUNGGUHAN dulu di belakang (numpad, soal, jam pasir semua sudah
+  // tampil) - tapi timer & jam pasir belum jalan (tunda=true). Overlay countdown "3 2 1 GO"
+  // menimpa DI ATASNYA, jadi background yang terlihat adalah game yang akan dimainkan.
+  mulai(mode, true);
+
+  const urutanCountdown = ['3','2','1','GO'];
+  let idx = 0;
+
+  const overlay = document.createElement('div');
+  overlay.id = 'countdownOverlay';
+  overlay.className = 'countdown-overlay';
+  overlay.innerHTML = `<div class="countdown-angka" id="countdownAngka"></div>`;
+  document.body.appendChild(overlay);
+
+  function langkahBerikutnya(){
+    const el = document.getElementById('countdownAngka');
+    if(!el) return; // overlay sudah dilepas (misal user pencet back)
+
+    const teks = urutanCountdown[idx];
+    el.textContent = teks;
+    el.classList.remove('countdown-main');
+    void el.offsetWidth; // paksa reflow supaya animasi zoom bisa diulang tiap langkah/kata
+    el.classList.add('countdown-main');
+
+    if(teks === '3'){ nada(523.25, 0, 0.22, 'triangle', 0.4); }
+    else if(teks === '2'){ nada(659.25, 0, 0.22, 'triangle', 0.4); }
+    else if(teks === '1'){ nada(783.99, 0, 0.22, 'triangle', 0.4); }
+    else { // GO - nada lebih besar & energik menandai mulai
+      nada(1046.5, 0,    0.10, 'square', 0.45);
+      nada(1318.5, 0.08, 0.34, 'square', 0.45);
+    }
+
+    idx++;
+    if(idx < urutanCountdown.length){
+      setTimeout(langkahBerikutnya, 1000);
+    } else {
+      setTimeout(()=>{
+        overlay.remove();
+        mulaiTimerSoalSaatIni(); // overlay hilang -> timer soal & jam pasir baru mulai jalan
+      }, 1000);
+    }
+  }
+  // Jeda kecil sebelum angka "3" pertama muncul - memberi waktu browser selesai menggambar
+  // tampilan game di belakang dulu, supaya animasi zoom angka pertama tidak "terlindas"/terlewat.
+  setTimeout(langkahBerikutnya, 200);
+}
+
+function mulai(mode, tunda){
+  catatKembali(()=>halamanMenuTes(state.modeUrutan));
+  // state.durasiTimer sudah selalu akurat & terbaru (lihat listener 'input' di halamanMenuTes),
+  // jadi tidak perlu lagi membaca elemen DOM #inpTimer di sini (yang bisa saja sudah tidak ada
+  // kalau mulai() dipanggil dari halaman lain seperti Perkalian Pilihan).
   state.mode = mode;
   state.skor = 0;
   state.riwayat = [];
@@ -1515,8 +1687,8 @@ function mulai(mode){
   state.sudahJawab = false;
   state.daftarSoal = buatDaftar(mode);
   state.idxSoal = 0;
-  suaraIntro();
-  tampilSoal();
+  if(!tunda) suaraIntro();
+  tampilSoal(tunda);
 }
 function tambahUlangan(a,b){
   const key = a+'_'+b;
@@ -1531,7 +1703,7 @@ function tambahUlangan(a,b){
   }
 }
 
-function tampilSoal(){
+function tampilSoal(tunda){
   clearTimerHandle();
   state.sudahJawab = false;
   const bg = WARNA_SOAL[Math.floor(Math.random()*WARNA_SOAL.length)];
@@ -1648,6 +1820,14 @@ function tampilSoal(){
   npHtml += `<button class="num-del" onclick="numpadInput('del')">⌫</button>`;
   numpad.innerHTML = npHtml;
 
+  if(!tunda){
+    hitungMundur();
+    mulaiAnimasiJamPasir(state.durasiTimer);
+  }
+}
+function mulaiTimerSoalSaatIni(){
+  // Dipanggil setelah overlay countdown "3 2 1 GO" selesai - baru sekarang timer soal
+  // & animasi jam pasir sungguhan berjalan.
   hitungMundur();
   mulaiAnimasiJamPasir(state.durasiTimer);
 }
