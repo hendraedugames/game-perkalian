@@ -184,8 +184,11 @@ h2.judul{color:var(--kuning); font-size:clamp(20px,4vw,28px); margin:22px 0 6px;
 .grid-tabel .btn{padding:14px 6px; font-size:15px;}
 
 /* ISI TABEL N */
-.baris-tabel{width:90%; max-width:420px; background:var(--panel); border-radius:12px; padding:16px 26px; margin:12px auto 0;}
-.baris-tabel div{padding:7px 0; font-size:24px; font-weight:bold; text-align:left;}
+.baris-tabel{width:90%; max-width:420px; background:var(--panel); border-radius:12px; padding:16px 26px; margin:12px auto 0; display:flex; flex-direction:column; align-items:center;}
+.baris-item{display:flex; align-items:center; padding:7px 0; font-size:24px; font-weight:bold; white-space:nowrap;}
+.kol-soal{width:7.5ch; text-align:left; white-space:nowrap;}
+.kol-eq{width:2.4ch; text-align:center;}
+.kol-hasil{text-align:left; white-space:nowrap;}
 .tabel-fredoka{font-family:'Fredoka', sans-serif;}
 
 /* MENU TES */
@@ -428,10 +431,13 @@ h2.judul{color:var(--kuning); font-size:clamp(20px,4vw,28px); margin:22px 0 6px;
 }
 .ready-wrap{ display:flex; flex-direction:column; align-items:center; text-align:center; padding:0 24px; }
 .ready-title{
-  font-family:'Geostar','Orbitron',sans-serif;
+  font-family:'Orbitron', sans-serif;
+  font-weight:700;
   font-size:clamp(30px,9vw,58px);
-  color:#4dd0ff;
-  text-shadow:0 0 10px rgba(77,208,255,.85), 0 0 26px rgba(77,208,255,.5), 0 0 46px rgba(77,208,255,.3);
+  color:rgba(255,215,0,.20);
+  -webkit-text-stroke:3px #ffd700;
+  text-stroke:3px #ffd700;
+  text-shadow:0 0 12px rgba(255,215,0,.9), 0 0 30px rgba(255,215,0,.6), 0 0 55px rgba(255,215,0,.35);
   letter-spacing:3px; line-height:1.3;
   animation: denyutReady 1.4s ease-in-out infinite;
 }
@@ -444,7 +450,7 @@ h2.judul{color:var(--kuning); font-size:clamp(20px,4vw,28px); margin:22px 0 6px;
 /* ══════════════════ OVERLAY COUNTDOWN "3 2 1 GO" (menimpa di atas game) ══════════════════ */
 .countdown-overlay{
   position:fixed; inset:0; z-index:800; display:flex; align-items:center; justify-content:center;
-  background:rgba(0,0,0,.35); pointer-events:none;
+  background:rgba(0,0,0,.35); pointer-events:auto; cursor:default;
 }
 .countdown-angka{
   font-size:clamp(150px,42vw,320px); font-weight:900; line-height:1; text-align:center;
@@ -1450,10 +1456,20 @@ function halamanTabel(){
 function halamanIsiTabel(n){
   clearTimerHandle();
   catatKembali(halamanTabel);
+  // Lebar kolom "n × i" DAN kolom hasil dihitung dinamis sesuai tabel yang sedang dilihat,
+  // patokannya baris terpanjang di tabel INI (selalu i=10, karena itu pengali & hasil terbesar).
+  // Dengan begitu SEMUA baris punya lebar total yang identik - baru aman ditengah-kan sebagai
+  // satu blok utuh tanpa geser-geser antar baris.
+  const contohTerpanjang = `${n} × 10`;
+  const lebarKolSoal = (contohTerpanjang.length + 0.5) + 'ch';
+  const lebarKolHasil = (String(n*10).length + 0.5) + 'ch';
+
   let rows = '';
   for(let i=1;i<=10;i++){
     const fg = i%2===0 ? 'var(--hijau)' : 'var(--teks)';
-    rows += `<div style="color:${fg}">   ${n}  ×  ${i}  =  ${n*i}   </div>`;
+    rows += `<div class="baris-item" style="color:${fg}">
+      <span class="kol-soal" style="width:${lebarKolSoal}">${n} × ${i}</span><span class="kol-eq">=</span><span class="kol-hasil" style="width:${lebarKolHasil}">${n*i}</span>
+    </div>`;
   }
   render(`
     <h2 class="judul">Tabel Perkalian ${n}</h2>
@@ -1647,9 +1663,12 @@ function tampilkanCountdownMulai(mode){
 
     const teks = urutanCountdown[idx];
     el.textContent = teks;
-    el.classList.remove('countdown-main');
-    void el.offsetWidth; // paksa reflow supaya animasi zoom bisa diulang tiap langkah/kata
-    el.classList.add('countdown-main');
+    // Teknik restart animasi paling andal lintas-browser: matikan animasi, paksa reflow,
+    // lalu nyalakan lagi - memastikan efek zoom benar-benar terpicu ulang di SETIAP angka
+    // (3, 2, 1, maupun GO), bukan cuma yang pertama.
+    el.style.animation = 'none';
+    void el.offsetWidth;
+    el.style.animation = '';
 
     if(teks === '3'){ nada(523.25, 0, 0.22, 'triangle', 0.4); }
     else if(teks === '2'){ nada(659.25, 0, 0.22, 'triangle', 0.4); }
@@ -1793,7 +1812,7 @@ function tampilSoal(tunda){
     </div>
     <div class="soal-center-col">
       <div class="soal-row">
-        <span>${a}  x  ${b}  =</span>
+        <span id="soalTeks">${tunda ? '?  ×  ?  =' : `${a}  x  ${b}  =`}</span>
         <input type="tel" inputmode="none" id="entryJwb" autocomplete="off" readonly>
       </div>
       <div id="fbCircleWrap"></div>
@@ -1820,6 +1839,13 @@ function tampilSoal(tunda){
   npHtml += `<button class="num-del" onclick="numpadInput('del')">⌫</button>`;
   numpad.innerHTML = npHtml;
 
+  if(tunda){
+    // Lapisan pengaman kedua terhadap "curi start": kunci numpad & tombol jawab selama
+    // countdown "3 2 1 GO" masih berlangsung, walau overlay-nya sendiri sudah menangkap sentuhan.
+    const numpadFooter = document.querySelector('.numpad-footer');
+    if(numpadFooter) numpadFooter.style.pointerEvents = 'none';
+  }
+
   if(!tunda){
     hitungMundur();
     mulaiAnimasiJamPasir(state.durasiTimer);
@@ -1827,7 +1853,14 @@ function tampilSoal(tunda){
 }
 function mulaiTimerSoalSaatIni(){
   // Dipanggil setelah overlay countdown "3 2 1 GO" selesai - baru sekarang timer soal
-  // & animasi jam pasir sungguhan berjalan.
+  // & animasi jam pasir sungguhan berjalan, dan numpad dibuka kuncinya.
+  const soalTeks = document.getElementById('soalTeks');
+  if(soalTeks && state.soalSkrg){
+    const [a,b] = state.soalSkrg;
+    soalTeks.textContent = `${a}  x  ${b}  =`;
+  }
+  const numpadFooter = document.querySelector('.numpad-footer');
+  if(numpadFooter) numpadFooter.style.pointerEvents = 'auto';
   hitungMundur();
   mulaiAnimasiJamPasir(state.durasiTimer);
 }
@@ -1959,6 +1992,7 @@ function tampilHasil(){
         <div style="color:#69f0ae">✅ Benar  : ${benar}</div>
         <div style="color:var(--aksen1)">❌ Salah  : ${salah}</div>
         <div style="color:var(--kuning)">⏰ Waktu habis  : ${habis}</div>
+        <div style="color:var(--abu)">⏱ Waktu per soal  : ${state.durasiTimer} detik</div>
       </div>
     </div>
     <div class="label-sub">── RIWAYAT JAWABAN ──</div>
@@ -1985,6 +2019,7 @@ function tampilHasilSempurna(riwayatHtml){
     <div class="hasil-sempurna-konten" id="hasilSempurnaKonten">
       <div class="nilai-sempurna-besar">100</div>
       <div class="kata-sempurna">SEMPURNA</div>
+      <div style="color:var(--abu); font-size:13px; margin-bottom:10px;">⏱ Waktu per soal  : ${state.durasiTimer} detik</div>
       <div class="label-sub">── RIWAYAT JAWABAN ──</div>
       <div class="riwayat-box">${riwayatHtml}</div>
       <div class="hasil-btn-row">
@@ -2011,7 +2046,7 @@ function tampilHasilSempurna(riwayatHtml){
   }, 600);
 }
 function mulaiUlang(){
-  mulai(state.mode);
+  tampilkanAreYouReady(state.mode);
 }
 
 /* ══════════════════ SUARA KLIK GLOBAL untuk semua tombol pilihan/opsi ══════════════════ */
